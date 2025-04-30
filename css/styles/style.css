@@ -1,0 +1,157 @@
+:root {
+    --color_text_login: rgb(40, 40, 60);
+    --orange_company_light: rgb(248, 187, 107);
+    --orange_company: rgb(219, 148, 56);
+    --orange_company_dark: rgb(192, 118, 22);
+    --blue_company_light: rgb(130, 211, 231);
+    --blue_company: rgb(62, 178, 207);
+    --blue_company_dark: rgb(22, 144, 175);
+}
+
+body {
+    text-decoration: none;
+    background: rgb(40, 40, 40);
+    color: rgb(255, 255, 255);
+    font-size: 15px;
+    font-family: 'Geist', 'Comic Relief', sans-serif;
+    font-weight: 500;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+#menu-header {
+    display: inline-flex;
+    background: rgba(240, 199, 112, 0.4);
+    width: 100%;
+    height: 70px;
+    left: 0;
+    right: 0;
+    top: 0;
+    font-size: 25px;
+    font-weight: bolder;
+}
+
+.Logo-container {
+    display: flex;
+    align-items: center;
+    left: 0;
+}
+
+.Logo {
+    height: 70px;
+    width: auto;
+    justify-self: center;
+}
+
+.Logo:hover {
+    cursor: pointer;
+}
+
+#menu-option {
+    list-style: none;
+    display: inline-flex;
+    justify-content: end;
+    align-items: center;
+    gap: 4%;
+    height: 100%;
+    width: 100%;
+    flex-direction: row;
+    margin: 0;
+    padding: 0 2%;
+}
+
+.menu-option a {
+    text-decoration: none;
+    color: rgb(255, 255, 255);
+    transition: all 0.1s ease-in-out;
+}
+
+.menu-option a:hover {
+    color: var(--orange_company);
+}
+
+.login-option {
+    background: var(--blue_company);
+    padding: 0 1.5%;
+    border: 3px solid var(--blue_company_dark);
+    border-radius: 20px;
+    transition: all 0.1s ease-in-out;
+}
+
+.login-option a {
+    text-decoration: none;
+    color: var(--color_text_login);
+    font-weight: 10px;
+    transition: all 0.1s ease-in-out;
+}
+
+.login-option:hover{
+    cursor: pointer;
+    border-color: var(--blue_company);
+    background: var(--blue_company_light);
+    --color_text_login: var(--orange_company_dark);
+}
+
+.button-menu-display {
+    display: none;
+    cursor: pointer;
+    position: absolute;
+    align-self: center;
+    right: 20px;
+    border: 4px solid black;
+    border-radius: 30%;
+    padding: 5px;
+    user-select: none;
+}
+
+.button-menu-display img {
+    transition: all 0.2s ease-in-out;
+}
+
+.title-container {
+    margin-top: 5vh;
+    justify-self: center;
+}
+
+.title{
+    font-size: 60px;
+    text-align: center;
+    text-justify: auto;
+    margin: 0;
+    padding: 0;
+}
+
+.button-menu-display img {
+    height: 35px;
+    width: auto;
+}
+
+.rotate {
+    transform: rotate(90deg);
+}
+
+@media screen and (max-width: 830px) {
+    .button-menu-display {
+        display: flex;
+    }
+
+    #menu-option {
+        display: none;
+    }
+
+    #menu-option.show {
+        display: block;
+        position: absolute;
+        justify-items: center;
+        top: 70px;
+        right: 0;
+        width: 30%;
+        height: auto;
+        border-radius: 0 0 0 20px;
+        padding-bottom: 10px;
+        background: rgb(120, 103, 65);
+        flex-direction: column;
+    }
+}
