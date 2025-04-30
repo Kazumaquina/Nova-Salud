@@ -1,11 +1,11 @@
 :root {
     --color_background: rgb(30, 30, 30);
     --color_background2: rgb(30, 30, 30);
-    --color_border: rgb(10, 10, 10);
-    --color_border2: rgb(10, 10, 10);
+    --color_border: rgb(20, 20, 20);
+    --color_border2: rgb(60, 60, 60);
     --color_text: rgb(60, 60, 60);
     --color_text2: rgb(30, 30, 30);
-    --color_text3: rgb(30, 30, 30);
+    --color_text3: rgb(60, 60, 60);
     --orange_company_light: rgb(246, 207, 156);
     --orange_company: rgb(219, 148, 56);
     --orange_company_dark: rgb(192, 118, 22);
