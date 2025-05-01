@@ -8,6 +8,10 @@
     --blue_company_dark: rgb(22, 144, 175);
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 body {
     text-decoration: none;
     background: rgb(40, 40, 40);
@@ -154,4 +158,34 @@ body {
         background: rgb(120, 103, 65);
         flex-direction: column;
     }
+}
+
+.slider-container {
+    margin-top: 40px;
+    display: inline-flex;
+    width: 100%;
+    height: auto;
+}
+
+#slider {
+    position: relative;
+    background: red;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+    width: 100%;
+    height: auto;
+    overflow: hidden;
+}
+
+.button {
+    
+}
+
+.slider-img {
+    height: 250px;
+    width: 250px;
+    margin: 10px;
+    background-color: aliceblue;
 }
