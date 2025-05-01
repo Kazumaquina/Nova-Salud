@@ -16,5 +16,8 @@
     "url": "https://github.com/Kazumaquina/Nova-Salud/issues"
   },
   "homepage": "https://github.com/Kazumaquina/Nova-Salud#readme",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "mysql2": "^3.14.1"
+  }
 }
