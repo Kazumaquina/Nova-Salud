@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="../css/fonts/Geist.css">
     <title>Nova Salud - Customer Service</title>
 </head>
-<body>
+<body onload="getProducts('select_product')">
     
     <!-- Header -->
     <header id="menu-header">
@@ -19,20 +19,65 @@
         </div>
 
         <!-- Opciones del Header -->
-
         <ul id="menu-option">
-            <li id="home" class="menu-option"><a href="index.html">Home</a></li>
-            <li id="products" class="menu-option"><a href="Customer_Services.html">Clients</a></li>
-            <li id="Sales" class="menu-option"><a href="Inventary.html">Inventary</a></li>
-            <li id="contact" class="menu-option"><a href="Products.html">Products</a></li>
-            <li id="login" class="login-option"><a href="../Login.html">Log-in</a></li>
+            <li id="home" class="menu-option"><a href="../pages/index.html">Home</a></li>
+            <li id="products" class="menu-option"><a href="../pages/Customer_Services.html">Clients</a></li>
+            <li id="Sales" class="menu-option"><a href="../pages/Inventary.html">Inventary</a></li>
+            <li id="contact" class="menu-option"><a href="../pages/Products.html">Products</a></li>
+            <li id="login" class="login-option"><a href="../pages/Login.html">Log-in</a></li>
         </ul>
 
+        <!-- Boton del Menu -->
         <div class="button-menu-display" onclick="openMenu()">
             <img src="../pictures/icons/menu.png" alt="boton_menu">
         </div>
     </header>
 
-    <script src="../JS/basics/script.js"></script>
+    <div class="form-container width80 margin4vh">
+        <div class="title-container margin1vh">
+            <h1 class="title font30"> Customer Service </h1>
+        </div>
+
+        <form id="form" class="form">
+            <input type="text" name="name_client" id="name_client" required>
+            <label for="name_client"> Client Name </label>
+
+            <button class="button margin5"> Delete </button>
+
+            <div class="customer-service margin15 width90">
+                <div class="title-container margin2vh">
+                    <h2 class="title"> Products </h2>
+                </div>
+
+                <div class="select-products">
+                    <span class="margin10 font15"> Producto: </span>
+                    <select name="select_product" class="width40" id="select_product" onchange="getStock('cant')">
+                        <option value="0" disabled selected> Selecciona un producto </option>
+                    </select>
+                    <input type="number" name="cant" id="cant" class="input width10" value="1" min="1"  required>
+                </div>
+
+                <div class="products-selection width100">
+                    <ul class="products-container margin2vh" id="products_table">
+                        
+                    </ul>
+                    
+                    <section class="buttons width30 justify-center padding20">
+                        <button class="button-icon"> <img src="../pictures/icons/add-to-basket.png" alt="add to basket"> </button>
+                        <button class="button-icon"> <img src="../pictures/icons/trash.png" alt="add"> </button>
+                    </section>
+                </div>
+
+                <div class="buttons justify-center margin2vh">
+                    <button class="button"> Save </button>
+                    <button class="button"> Cancel </button>
+                </div>
+            </div>
+            <input type="hidden" id="metodo" value="POST">
+        </form>
+    </div>
+
+    <script src="../scripts/main.js"></script>
+    <script src="../scripts/api.js"></script>
 </body>
 </html>

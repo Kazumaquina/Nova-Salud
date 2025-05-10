@@ -6,6 +6,8 @@
     --blue_company_light: rgb(130, 211, 231);
     --blue_company: rgb(62, 178, 207);
     --blue_company_dark: rgb(22, 144, 175);
+    --background-button: rgb(83, 108, 127);
+    --color-text-button: rgb(222, 222, 222);
 }
 
 html {
@@ -51,6 +53,59 @@ body {
 
 .Logo:hover {
     cursor: pointer;
+}
+
+.buttons {
+    display: inline-flex;
+    justify-self: end;
+    align-items: center;
+    gap: 20px;
+    width: auto;
+    height: auto;
+}
+
+.button {
+    cursor: pointer;
+    border-style: none;
+    border-radius: 10px;
+    height: 25px;
+    width: auto;
+    background-color: var(--background-button);
+    color: var(--color-text-button);
+    transition: all 0.1s ease-in-out;
+}
+
+.button:hover {
+    background-color: var(--blue_company_dark);
+    color: var(--orange_company_light);
+}
+
+.button-icon {
+    cursor: pointer;
+    border-style: none;
+    background: none;
+    padding: 0;
+}
+
+.button-icon img {
+    height: 40px;
+    width: auto;
+    transition: all 0.1s ease-in-out;
+}
+
+.button-icon img:hover {
+    transform: scale(1.1);
+}
+
+.input {
+    border-style: none;
+    border-radius: 2px;
+}
+
+#cant {
+    margin-left: 40px;
+    font-size: 15px;
+    font-weight: bolder;
 }
 
 #menu-option {
@@ -115,12 +170,10 @@ body {
 }
 
 .title-container {
-    margin-top: 5vh;
     justify-self: center;
 }
 
 .title{
-    font-size: 60px;
     text-align: center;
     text-justify: auto;
     margin: 0;
@@ -136,7 +189,7 @@ body {
     transform: rotate(90deg);
 }
 
-@media screen and (max-width: 830px) {
+@media screen and (max-width: 875px) {
     .button-menu-display {
         display: flex;
     }
@@ -179,13 +232,248 @@ body {
     overflow: hidden;
 }
 
-.button {
-    
-}
-
 .slider-img {
     height: 250px;
     width: 250px;
     margin: 10px;
     background-color: aliceblue;
+}
+
+.form-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    justify-self: center;
+    align-items: center;
+    border: 5px solid rgb(0, 0, 0);
+    border-radius: 15px;
+    box-shadow: 10px 0 15px rgb(0, 0, 0);
+    height: auto;
+    max-width: 1000px;
+    background-color: rgb(25, 25, 25);
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: auto;
+}
+
+.customer-service {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border: 2px solid rgb(60, 60, 60);
+    background: rgb(50, 50, 50);
+    border-radius: 15px;
+}
+
+.products-selection {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    height: auto;
+}
+
+.products-container {
+    display: grid;
+    background-color: rgb(40, 40, 40);
+    border: 2px solid rgb(0, 0, 0);
+    border-top-left-radius: 12px;
+    width: 70%;
+    height: auto;
+    min-height: 50px;
+}
+
+.select-products {
+    display: inline-flex;
+    align-items: center;
+    border-style: none;
+    margin-left: 20px;
+}
+
+.select-products select {
+    height: auto;
+    border-radius: 4px;
+}
+
+/* FONTS SIZE */
+.font12 {
+    font-size: 12px;
+}
+
+.font15 {
+    font-size: 15px;
+}
+
+.font20 {
+    font-size: 20px;
+}
+
+.font30 {
+    font-size: 30px;
+}
+
+.font40 {
+    font-size: 40px;
+}
+
+.font50{
+    font-size: 50px;
+}
+
+.font60 {
+    font-size: 60px;
+}
+
+/* MARGINS */
+.margin5 {
+    margin: 5px;
+}
+
+.margin10 {
+    margin: 10px;
+}
+
+.margin15 {
+    margin: 15px;
+}
+
+.margin20 {
+    margin: 20px;
+}
+
+.margin25 {
+    margin: 25px;
+}
+
+.margin30 {
+    margin: 30px;
+}
+
+.margin1vh {
+    margin: 1vh;
+}
+
+.margin2vh {
+    margin: 2vh;
+}
+
+.margin3vh {
+    margin: 3vh;
+}
+
+.margin4vh {
+    margin: 4vh;
+}
+
+.margin5vh {
+    margin: 5vh;
+}
+
+/* PADDINGS */
+.padding5 {
+    padding: 5px;
+}
+
+.padding10 {
+    padding: 10px;
+}
+
+.padding15 {
+    padding: 15px;
+}
+
+.padding20 {
+    padding: 20px;
+}
+
+.padding25 {
+    padding: 25px;
+}
+
+.padding30 {
+    padding: 30px;
+}
+
+/* DIRECTIONS */
+.justify-center {
+    justify-content: center;
+}
+
+.justify-left {
+    justify-content: left;
+}
+
+.justify-right {
+    justify-content: right;
+}
+
+.left {
+    left: 0;
+}
+
+.right {
+    right: 0;
+}
+
+/* WIDTH */
+.width10 {
+    width: 10%;
+}
+
+/* BACKGROUND COLORS */
+.background-white {
+    background-color: rgb(255, 255, 255);
+}
+
+.background-red {
+    background-color: rgb(221, 66, 66);
+}
+
+.background-green {
+    background-color: rgb(82, 221, 72);
+}
+
+.background-orange {
+    background-color: rgb(213, 123, 67);
+}
+
+.width20 {
+    width: 20%;
+}
+
+.width30 {
+    width: 30%;
+}
+
+.width40 {
+    width: 40%;
+}
+
+.width50 {
+    width: 50%;
+}
+
+.width60 {
+    width: 60%;
+}
+
+.width70 {
+    width: 70%;
+}
+
+.width80 {
+    width: 80%;
+}
+
+.width90 {
+    width: 90%;
+}
+
+.width100 {
+    width: 100%;
 }
