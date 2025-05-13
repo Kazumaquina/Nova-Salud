@@ -1,7 +1,24 @@
 const db = require('./db');
 
 function handle(req, res) {
-  if ( req.url === '/stock' && req.method === 'POST' ) {
+  if ( req.url === '/products' && req.method === 'GET' ) {
+        try{
+            db.query('SELECT * FROM productos_farmacia', (err, result) => {
+            if (err) {
+                console.error(err);
+                res.writeHead(500, { 'Content-Type': 'text/plain' });
+                res.end('Error al obtener los datos.');
+            } else {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify(result));
+            }
+            });
+        } catch (error) {
+            console.error(error);
+            res.writeHead(500, { 'Content-Type': 'text/plain' });
+            res.end('Error al obtener los datos.');
+        }
+  } else if ( req.url === '/stock' && req.method === 'POST' ) {
     let body = '';
 
     req.on('data', chunk => {
@@ -21,9 +38,9 @@ function handle(req, res) {
             throw new Error('Formato no soportado');
             }
 
-            const { product } = data;
+            const { id } = data;
 
-            db.query('CALL getStock(?);', [product], (err, result) => {
+            db.query('CALL getStock(?);', [id], (err, result) => {
             if (err) {
                 console.error(err);
                 res.writeHead(500);
@@ -39,46 +56,27 @@ function handle(req, res) {
             res.end('Error al obtener los datos.');
         }
     });
-  }else if ( req.url === '/products' && req.method === 'POST' ) {
-    let body = '';
-
-    req.on('data', chunk => {
-      body += chunk;
-    });
-
-    req.on('end', () => {
-        try{
-            let data;
-            let products = [];
-            const contentType = req.headers['content-type'];
-
-            if (contentType === 'application/json') {
-            data = JSON.parse(body);
-            } else if (contentType === 'application/x-www-form-urlencoded') {
-            data = Object.fromEntries(new URLSearchParams(body));
-            } else {
-            throw new Error('Formato no soportado');
-            }
-
-            db.query('SELECT nombre FROM productos_farmacia', (err, result) => {
-            if (err) {
-                console.error(err);
-                res.writeHead(500);
-                res.end('Error al obtener los datos.');
-            } else {
-                res.writeHead(200);
-                result.forEach(product => {
-                    products.push(product.nombre);
-                })
-                res.end(JSON.stringify(products));
-            }
-            });
-        } catch (error) {
-            console.error(error);
-            res.writeHead(500);
-            res.end('Error al obtener los datos.');
+  } else if ( req.url === '/products_names' && req.method === 'GET' ) {
+    try{
+        const products = [];
+        db.query('SELECT id, nombre FROM productos_farmacia', (err, result) => {
+        if (err) {
+          console.error(err);
+          res.writeHead(500, { 'Content-Type': 'text/plain' });
+          res.end('Error al obtener los datos.');
+        } else {
+          result.forEach(product => {
+              products.push({ id: product.id, nombre: product.nombre});
+          })
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify(products));
         }
-    });
+        });
+      } catch (error) {
+          console.error(error);
+          res.writeHead(500, {  'Content-Type': 'text/plain' });
+          res.end('Error al obtener los datos.');
+      }
   } else if (req.url === '/enviar' && req.method === 'POST') {
     let body = '';
 

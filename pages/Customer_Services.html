@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="../css/fonts/Geist.css">
     <title>Nova Salud - Customer Service</title>
 </head>
-<body onload="getProducts('select_product')">
+<body onload="getProductsNames('select_product')">
     
     <!-- Header -->
     <header id="menu-header">
@@ -34,50 +34,77 @@
     </header>
 
     <div class="form-container width80 margin4vh">
-        <div class="title-container margin1vh">
+        <div class="title-container margin4vh">
             <h1 class="title font30"> Customer Service </h1>
         </div>
 
         <form id="form" class="form">
-            <input type="text" name="name_client" id="name_client" required>
-            <label for="name_client"> Client Name </label>
+            <input type="text" name="name_client" id="name_client" class="input" placeholder=" " required>
+            <label for="name_client" class="label"> Client Name </label>
 
-            <button class="button margin5"> Delete </button>
+            <button type="button" onclick="clearName('name_client')" class="button"> Clear </button>
 
             <div class="customer-service margin15 width90">
                 <div class="title-container margin2vh">
                     <h2 class="title"> Products </h2>
                 </div>
 
-                <div class="select-products">
+                <div class="select-products justify-center width100">
                     <span class="margin10 font15"> Producto: </span>
-                    <select name="select_product" class="width40" id="select_product" onchange="getStock('cant')">
+                    <select name="select_product" class="width200px" id="select_product" onchange="getStock('cant'), loadProductInfo('select_product', 'price', 'stock')">
                         <option value="0" disabled selected> Selecciona un producto </option>
                     </select>
-                    <input type="number" name="cant" id="cant" class="input width10" value="1" min="1"  required>
+                    <input type="number" name="cant" id="cant" class="input width50px" value="1" min="1"  required>
+                </div>
+
+                <div class="product-info border width50 justify-center">
+                    <span class="margin10 font15"> Precio: </span>
+                    <span class="margin10 font15" id="price"> S/. 0 </span>
+                    <span class="margin10 font15"> Stock: </span>
+                    <span class="margin10 font15" id="stock"> 0 </span>
                 </div>
 
                 <div class="products-selection width100">
-                    <ul class="products-container margin2vh" id="products_table">
-                        
-                    </ul>
+                    <table class="products-container width70 margin2vh" id="products_table">
+                        <thead>
+                            <tr class="table-header-products">
+                                <th class="border-right font15"> Id </th>
+                                <th class="font15"> Product </th>
+                                <th class="border-left font15"> Price </th>
+                                <th class="border-left font15"> Cantity </th>
+                                <th class="border-left font15"> SubTotal </th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <!-- Aqui van los productos -->
+                        </tbody>
+
+                        <tfoot>
+                            <tr class="table-footer-products">
+                                <th class="border-right font15"> Total </th>
+                                <th class="font15" id="total"> S/. 0 </th>
+                            </tr>
+                        </tfoot>
+                    </table>
                     
-                    <section class="buttons width30 justify-center padding20">
-                        <button class="button-icon"> <img src="../pictures/icons/add-to-basket.png" alt="add to basket"> </button>
-                        <button class="button-icon"> <img src="../pictures/icons/trash.png" alt="add"> </button>
+                    <section class="buttons width10 justify-center padding20">
+                        <button type="button" class="button-icon" onclick="addProductToTable('products_table', 'select_product', 'cant')"> <img src="../pictures/icons/add-to-basket.png" alt="add to basket"> </button>
+                        <button type="button" class="button-icon"> <img src="../pictures/icons/trash.png" alt="delete all" onclick="deleteAllProductsOnTable('products_table')"> </button>
                     </section>
                 </div>
 
+                <span id="error-message" class="font14"></span>
+
                 <div class="buttons justify-center margin2vh">
-                    <button class="button"> Save </button>
-                    <button class="button"> Cancel </button>
+                    <input type="submit" class="button" value="Save">
+                    <button type="reset" class="button"> Clear </button>
                 </div>
             </div>
             <input type="hidden" id="metodo" value="POST">
         </form>
     </div>
 
-    <script src="../scripts/main.js"></script>
-    <script src="../scripts/api.js"></script>
+    <script type="module" src="../scripts/main.js"></script>
 </body>
 </html>

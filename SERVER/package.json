@@ -1,11 +1,11 @@
 {
   "name": "entregable-fullstack-senati",
   "version": "1.0.0",
-  "main": "Login.html",
+  "main": "index.html",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node scripts/src/server.js",
-    "dev": "nodemon scripts/src/server.js"
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
   },
   "repository": {
     "type": "git",

@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="../css/fonts/Geist.css">
     <title>Nova Salud - Products</title>
 </head>
-<body>
+<body onload="loadProducts('productos')">
     
     <!-- Header -->
     <header id="menu-header">
@@ -33,6 +33,148 @@
         </div>
     </header>
 
-    <script src="../scripts/main.js"></script>
+    <div class="form-container width80 margin4vh">
+        <div class="title-container margin4vh">
+            <h1 class="title font30"> Products </h1>
+        </div>
+
+        <form id="form" class="form">
+            <div class="display-inline-flex">
+                <div class="display-block">
+                    <input type="text" name="name_product_add" id="name_product_add" class="input" placeholder=" " required>
+                    <label for="name_product_add" class="label justify-center display-flex"> Product </label>
+                </div>
+
+                <div class="display-block">
+                    <input type="text" name="name_mark_add" id="name_mark_add" class="input" placeholder=" " required>
+                    <label for="name_mark_add" class="label justify-center display-flex"> Mark </label>
+                </div>
+
+                <div class="display-block">
+                    <input type="number" name="name_price_add" id="name_price_add" class="input width60px" placeholder=" " min="0.01" step="0.01" required>
+                    <label for="name_price_add" class="label justify-center display-flex"> Price </label>
+                </div>
+                <div class="display-block">
+                    <input type="number" name="name_stock_add" id="name_stock_add" class="input width60px" placeholder=" " min="1" step="1" required>
+                    <label for="name_stock_add" class="label justify-center display-flex"> Stock </label>
+                </div>
+                <input type="submit" id="save" class="button" value="Add">
+            </div>
+
+            <div class="products-selection width100 justify-center">
+                <table class="products-container width90 margin-bottom2vh max-height500px height100" id="productos">
+                    <thead>
+                        <tr class="table-header-products">
+                            <th class="border-right font15"> Id </th>
+                            <th class="font15"> Product </th>
+                            <th class="border-left font15"> Price </th>
+                            <th class="border-left font15"> Stock </th>
+                            <th class="border-left font15"> Mark </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <!-- Aqui van los productos -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="buttons margin-bottom20px">
+                <button type="button" class="button" onclick="toggleInterface('interface-update')"> Update </button>
+                <button type="button" class="button"> Delete </button>
+            </div>
+        </form>
+    </div>
+
+    <div id="interface-update" class="interface hidden">
+        <div class="form-container width70">
+            <div class="title-container margin-top30px margin-bottom10px">
+                <h2 class="title font30"> Update </h2>
+            </div>
+
+            <form id="form-update" class="form">
+                <section class="section width90">
+                    <div class="title-container">
+                        <h3> Search the product you want to update </h3>
+                    </div>
+
+                    <div class="display-inline-flex width100">
+                        <div class="width40">
+                            <div class="title-container">
+                                <h4> Search with ID </h4>
+                            </div>
+
+                            <div class="display-block">
+                                <input type="number" name="id_product_update_search" id="id_product_update_search" class="input display-flex width60px justify-center-self" placeholder=" " min="1" step="1">
+                                <label for="id_product_update_search" class="label justify-center display-flex"> ID </label>
+                            </div>
+                        </div>
+
+                        <div class="width60 justify-center">
+                            <div class="title-container">
+                                <h4> Search with other fields </h4>
+                            </div>
+
+                            <div class="display-inline-flex">
+                                <div class="display-block">
+                                    <input type="text" name="name_product_update_search" id="name_product_update_search" class="input" placeholder=" ">
+                                    <label for="name_product_update_search" class="label justify-center display-flex"> Product </label>
+                                </div>
+                                
+                                <div class="display-block">
+                                    <input type="number" name="price_product_update_search" id="price_product_update_search" class="input width70px" placeholder=" ">
+                                    <label for="price_product_update_search" class="label justify-center display-flex"> Price </label>
+                                </div>
+
+                                <div class="display-block">
+                                    <input type="text" name="mark_product_update_search" id="mark_product_update_search" class="input" placeholder=" ">
+                                    <label for="mark_product_update_search" class="label justify-center display-flex"> Mark </label>
+                                </div>
+
+                                <div class="display-block">
+                                    <input type="number" name="sotock_product_update_search" id="stock_product_update_search" class="input width70px" placeholder=" ">
+                                    <label for="stock_product_update_search" class="label justify-center display-flex"> Stock </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="display-block">
+                    <div class="title-container">
+                        <h3> Update Product </h3>
+                    </div>
+
+                    <div class="display-inline-flex justify-center width100">
+                        <div class="display-block margin-right20px margin-left20px">
+                            <input type="text" name="name_product_update" id="name_product_update" class="input" placeholder=" " required>
+                            <label for="name_product_update" class="label justify-center display-flex"> Product </label>
+                        </div>
+
+                        <div class="display-block margin-right20px">
+                            <input type="text" name="name_mark_update" id="name_mark_update" class="input" placeholder=" " required>
+                            <label for="name_mark_update" class="label justify-center display-flex"> Mark </label>
+                        </div>
+
+                        <div class="display-block margin-right20px">
+                            <input type="number" name="price_update" id="price_update" class="input width70px" placeholder=" " min="0.01" step="0.01" required>
+                            <label for="price_update" class="label justify-center display-flex"> Price </label>
+                        </div>
+
+                        <div class="display-block margin-right20px">
+                            <input type="number" name="stock_update" id="stock_update" class="input width70px" placeholder=" " min="1" step="1" required>
+                            <label for="stock_update" class="label justify-center display-flex"> Stock </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="buttons">
+                    <button type="button" class="button margin-bottom10px" onclick="toggleInterface('interface-update')"> Cancel </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="../scripts/main.js"></script>
 </body>
 </html>

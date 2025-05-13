@@ -1,25 +1,20 @@
 const form = document.getElementById('form');
 
-form.addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    const name_client = form.name_client.value.trim();
-    const products_table = form.products_table;
-    const metodo = form.metodo.value;
+export function saveSale(name_client, products_table) {
     let products = [];
 
     let verif = [true, metodo];
+
+    if ( name_client.trim() === '' ) {
+        verif[0] = false;
+        alert('El nombre del cliente no puede estar vacio.');
+    }
 
     for (let i = 0; i < products_table.length; i++) {
         if (products_table[i].checked) {
             products.push(products_table[i].value);
             console.log(products[i]);
         }
-    }
-
-    if ( name_client === '' ) {
-        alert('El campo de nombre es obligatorio.');
-        verif[0] = false;
     }
 
     if ( verif[0] ) {
@@ -43,19 +38,18 @@ form.addEventListener('submit', function(e) {
             console.error(error);
         });
     }
-});
+}
 
-function getStock(obj) {
+export function getStock(obj) {
     const input = document.getElementById(`${obj}`);
-    const product = input.parentElement.querySelector('select').value;
-    console.log(product);
+    const id = input.parentElement.querySelector('select').value;
 
     fetch('/stock', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ product })
+        body: JSON.stringify({ id })
     })
     .then(response => {
         if (!response.ok) throw new Error('Error en el envío');
@@ -70,16 +64,10 @@ function getStock(obj) {
     });
 }
 
-function getProducts(obj) {
+export function getProductsNames(obj) {
     const select = document.getElementById(`${obj}`);
 
-    fetch('/products', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ bool: true })
-    })
+    fetch('/products_names')
     .then(response => {
         if (!response.ok) throw new Error('Error en el envío');
         return response.json();
@@ -87,8 +75,8 @@ function getProducts(obj) {
     .then(items => {
         items.forEach(item => {
             const option = document.createElement('option');
-            option.value = item;
-            option.textContent = item;
+            option.value = item.id;
+            option.textContent = item.nombre;
             select.appendChild(option);
         });
     })
@@ -96,4 +84,23 @@ function getProducts(obj) {
         alert('Hubo un error al enviar los datos.');
         console.error(error);
     });
+}
+
+export async function getProducts() {
+    let productos;
+    await fetch('/products')
+    .then(response => {
+        if (!response.ok) throw new Error('Error en el envío');
+        return response.json();
+    })
+    .then(items => {
+        productos = items;
+    })
+    .catch(error => {
+        alert('Hubo un error al enviar los datos.');
+        console.error(error);
+        return
+    });
+
+    return productos;
 }
