@@ -4,6 +4,7 @@ const menu_option = document.getElementById("menu-option");
 const icon_option = document.querySelector('.button-menu-display img');
 const form = document.getElementById('form');
 const error_message = document.getElementById('error-message');
+let selected_rows = [];
 
 /* Funciones del Main */
 window.openMenu = openMenu;
@@ -210,12 +211,63 @@ function errorMessage(p, message = '') {
 
 async function loadProducts( tabla ) {
     const table = document.getElementById(`${tabla}`);
+    const isEmpty = table.querySelector('tbody').children.length < 1;
+
+    if ( !isEmpty ) {
+        return;
+    }
 
     const products = await api.getProducts();
 
     products.forEach(product => {
-        
+        const tr = document.createElement('tr');
+        const td_id = document.createElement('td');
+        const td_product = document.createElement('td');
+        const td_price = document.createElement('td');
+        const td_stock = document.createElement('td');
+        const td_mark = document.createElement('td');
+
+        tr.classList.add('border-bottom');
+        tr.classList.add('table-products-item');
+
+        td_id.classList.add('border-right');
+        td_price.classList.add('border-left');
+        td_stock.classList.add('border-left');
+        td_mark.classList.add('border-left');
+
+        td_id.classList.add('font13');
+        td_product.classList.add('font13');
+        td_price.classList.add('font13');
+        td_stock.classList.add('font13');
+        td_mark.classList.add('font13');
+
+        td_id.textContent = (product.id).toString().padStart(4, '0');
+        td_product.textContent = product.nombre;
+        td_price.textContent = 'S/. ' +  product.precio;
+        td_stock.textContent = product.stock;
+        td_mark.textContent = product.marca;
+
+        table.children[1].appendChild(tr);
+        tr.appendChild(td_id);
+        tr.appendChild(td_product);
+        tr.appendChild(td_price);
+        tr.appendChild(td_stock);
+        tr.appendChild(td_mark);
     })
+
+    try {
+        table.querySelectorAll('tbody tr').forEach(tr => tr.addEventListener('click', function() { 
+            const row = this;
+            row.classList.toggle('selected-row');
+
+            if (selected_rows.includes(row)) {
+                selected_rows = selected_rows.filter(r => r !== row);
+            } else
+                selected_rows.push(row); 
+        }));
+    } catch (error) {
+        console.log('error de evento de selected_rows', error);
+    }
 }
 
 function toggleInterface( obj ) {
