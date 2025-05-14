@@ -5,6 +5,7 @@ const formDelete = document.getElementById('form-delete');
 const menu_option = document.getElementById("menu-option");
 const icon_option = document.querySelector('.button-menu-display img');
 const form = document.getElementById('form');
+const form_add_product = document.getElementById('form_add_product');
 const error_message = document.getElementById('error-message');
 let selected_rows = [];
 
@@ -17,14 +18,17 @@ window.deleteAllProductsOnTable = deleteAllProductsOnTable;
 window.clearName = clearName;
 window.deleteProductFromTable = deleteProductFromTable;
 window.forEachTable = forEachTable;
-window.clearErrorMessage = errorMessage;
+window.errorMessage = errorMessage;
 window.toggleInterface = toggleInterface;
 window.restoreTableOfInterface = restoreTableOfInterface;
+window.searchProduct = searchProduct;
+window.deleteSelectedProducts = deleteSelectedProducts;
 
 /* Funciones de Api */
 window.getProducts = api.getProducts;
 window.getProductsNames = api.getProductsNames;
 window.getStock = api.getStock;
+window.addProduct = api.addProduct;
 
 try {
     formUpdate.addEventListener('submit', function(e) {
@@ -86,11 +90,78 @@ try {
 }
 
 try {
+    form_add_product.addEventListener('submit', function(e) { // Listener para el formulario de AÑADIR producto
+        e.preventDefault(); // Evita que la página se recargue
+        errorMessage(error_message); // Limpia mensajes previos
+
+        // --- Recolectar datos del formulario de AÑADIR producto ---
+        const name = document.getElementById('name_product_add').value;
+        const mark = document.getElementById('name_mark_add').value;
+        const price = parseFloat(document.getElementById('name_price_add').value);
+        const stock = parseInt(document.getElementById('name_stock_add').value);
+
+        // --- Validar datos básicos antes de enviar ---
+        if (name.trim() === '' || mark.trim() === '') {
+            errorMessage(error_message, 'Nombre y Marca no pueden estar vacíos.');
+            return;
+        }
+        if (isNaN(price) || price <= 0) { // Asumiendo que el precio debe ser mayor que 0
+            errorMessage(error_message, 'Precio inválido.');
+            return;
+        }
+        if (isNaN(stock) || stock < 0) { // Asumiendo que el stock puede ser 0 o más
+            errorMessage(error_message, 'Stock inválido.');
+            return;
+        }
+
+        // --- Crear el objeto con los datos del nuevo producto para enviar a la API ---
+        const newProductData = {
+            nombre: name,
+            marca: mark,
+            precio: price,
+            stock: stock
+        };
+
+        // --- Llamar a la funcion de API para añadir el producto (la crearemos en api.js) ---
+        api.addProduct(newProductData);
+
+        // --- Acciones despues de intentar enviar (opcional, puedes ajustar) ---
+        form_add_product.reset(); // Limpia los campos del formulario de añadir producto
+        // Opcional: recargar la lista de productos en la tabla principal para ver el nuevo producto
+         // loadProducts('productos'); // Asumiendo que 'productos' es el ID de la tabla principal
+
+    });
+} catch (error) {
+    console.error('Error en el evento submit del formulario de añadir producto:', error);
+    errorMessage(error_message, 'Ocurrio un error inesperado al procesar para añadir producto.');
+}
+
+try {
     formDelete.addEventListener('submit', function(e) {
         e.preventDefault();
+
         const error_delete = document.getElementById('error_message_delete');
 
+        if ( selected_rows.length === 0 ) {
+            errorMessage(error_delete, 'Debe seleccionar al menos un producto.');
+            return;
+        }
+
+        const confirm_delete = document.getElementById('confirm-interface');
+        const table_confirm = document.getElementById('products_table_delete_confirm');
+
+        deleteAllProductsOnTable(table_confirm.id);
         errorMessage(error_delete);
+
+        confirm_delete.classList.remove('hidden');
+
+        console.log(selected_rows.length);
+
+        selected_rows.forEach(row => {
+            
+            table_confirm.querySelector('tbody').appendChild(row.cloneNode(true));
+
+        });
     });
 } catch (error) {
     console.error('Error en el evento submit del formulario de eliminacion:', error);
@@ -142,6 +213,120 @@ try {
     });
 } catch (error) {
     errorMessage(error_message, 'Ocurrio un error inesperado.');
+}
+
+try {
+    form_add_product.addEventListener('submit', function(e) {
+        e.preventDefault();
+        errorMessage(error_message);
+
+        const productsTableElement = document.getElementById('productos'); // Obtiene la tabla de productos
+        const tbody = productsTableElement.querySelector('tbody'); // Obtiene el cuerpo de la tabla
+        const rows = tbody.querySelectorAll('tr'); // Obtiene las filas de productos
+
+    });
+} catch (error) {
+    errorMessage(error_message, 'Ocurrio un error inesperado.');
+}
+
+async function deleteSelectedProducts() {
+    // Limpiar mensajes de error relevantes ANTES de iniciar la operación
+    // Asegúrate de que estos elementos de mensaje existan en tu HTML
+    const errorDelete = document.getElementById('error_message_delete'); // Mensaje en interfaz delete
+    const errorGlobal = document.getElementById('error-message'); // Mensaje global si lo usas
+    const errorUpdate = document.getElementById('error_message_update'); // Mensaje en interfaz update
+
+    // Si los elementos existen, limpiarlos.
+    if (errorDelete) errorMessage(errorDelete, '');
+    if (errorGlobal) errorMessage(errorGlobal, '');
+    if (errorUpdate) errorMessage(errorUpdate, '');
+
+
+    // Validar si hay filas seleccionadas antes de continuar
+    if (selected_rows.length === 0) {
+         // Si no hay nada seleccionado, muestra un mensaje y cierra la confirmación (si está abierta)
+         if (errorDelete) errorMessage(errorDelete, 'Debe seleccionar al menos un producto para eliminar.');
+         toggleInterface('confirm-interface'); // Asegúrate de que toggleInterface existe
+         return; // Detiene la ejecución si no hay selección
+    }
+
+    // Obtener los IDs de los productos seleccionados de la lista selected_rows
+    const productIdsToDelete = selected_rows.map(row => {
+        // Obtenemos el ID del atributo data-productId de la fila (añadido en loadProducts)
+        const productId = parseInt(row.dataset.productId);
+        return productId;
+    }).filter(id => !isNaN(id) && id > 0); // Filtrar IDs que no son números válidos o son <= 0
+
+    // Si no se encontraron IDs válidos entre las filas seleccionadas
+    if (productIdsToDelete.length === 0) {
+        if (errorDelete) errorMessage(errorDelete, 'Ninguno de los productos seleccionados tenía un ID válido.');
+        toggleInterface('confirm-interface'); // Cierra la confirmación
+        // Opcional: Limpiar la lista visual y lógica de selected_rows
+        // selected_rows.forEach(row => row.classList.remove('selected-row'));
+        // selected_rows = [];
+        return; // Detiene la ejecución
+    }
+
+    // --- Llamar a la función de API para eliminar productos y manejar la respuesta ---
+    try {
+        // Llama a api.deleteProducts y ESPERA su respuesta.
+        // api.deleteProducts ahora lanza un error si la respuesta del servidor no es OK.
+        // Si se resuelve sin error, successMessage contendrá el texto de éxito del backend.
+        const successMessage = await api.deleteProducts(productIdsToDelete);
+
+        // --- Si llegamos aquí, la eliminación fue EXITOSA ---
+        console.log('Eliminación exitosa:', successMessage); // Log de consola para verificar
+
+        // 1. Mostrar mensaje de éxito (en el DOM)
+        // Puedes mostrarlo en el mensaje de error de la interfaz de delete o en el mensaje global.
+         if (errorDelete) errorMessage(errorDelete, 'Éxito: ' + successMessage);
+        // if (errorGlobal) errorMessage(errorGlobal, 'Éxito al eliminar: ' + successMessage); // O usar el global
+
+        // 2. Cerrar la interfaz de confirmación ("Are you sure...")
+        toggleInterface('confirm-interface'); // Asegúrate de que toggleInterface existe
+
+        // 3. Recargar TODAS las tablas relevantes para reflejar los cambios en la lista de productos
+        // Asegúrate de que loadProducts existe y funciona correctamente con los IDs de tabla
+        loadProducts('productos'); // La tabla principal de añadir producto
+        loadProducts('products_table'); // La tabla en la interfaz de actualizar
+        loadProducts('products_table_delete'); // La tabla en la interfaz de eliminar
+
+        // 4. Limpiar la lista de filas seleccionadas global y visualmente
+        selected_rows.forEach(row => row.classList.remove('selected-row')); // Quita la clase visual
+        selected_rows = []; // Limpia el array
+
+
+        // Opcional: Cerrar la interfaz de eliminación principal (#interface-delete) también en caso de éxito
+        // toggleInterface('interface-delete');
+
+
+    } catch (error) {
+        // --- Si llegamos aquí, la eliminación FALLÓ (api.deleteProducts lanzó un error) ---
+        console.error('Error al eliminar productos (manejado en main.js):', error);
+
+        // 1. Mostrar mensaje de error (en el DOM)
+        // Usamos el mensaje que api.js incluyó en el objeto Error lanzado.
+        const displayMessage = error.message || 'Ocurrió un error desconocido al eliminar productos.';
+        // Mostrar en el mensaje específico de la interfaz de delete
+        if (errorDelete) errorMessage(errorDelete, 'Error: ' + displayMessage);
+        // O en el mensaje global si lo usas
+        // if (errorGlobal) errorMessage(errorGlobal, 'Error al eliminar: ' + displayMessage);
+
+
+        // 2. Cerrar la interfaz de confirmación ("Are you sure...")
+        toggleInterface('confirm-interface'); // Siempre cerramos la ventana de confirmación al terminar el intento
+
+        // 3. Recargar tablas para mostrar el estado actual (cuáles NO se eliminaron si hubo error, ej. clave foránea)
+        loadProducts('productos');
+        loadProducts('products_table');
+        loadProducts('products_table_delete');
+
+        // 4. Las filas seleccionadas se mantienen visualmente y en el array selected_rows
+        // para que el usuario vea cuáles fallaron o si quiere reintentar/investigar.
+        // Si prefieres limpiar la selección incluso en caso de error, descomenta:
+        // selected_rows.forEach(row => row.classList.remove('selected-row'));
+        // selected_rows = [];
+    }
 }
 
 function openMenu() {
@@ -279,10 +464,14 @@ function deleteAllProductsOnTable(tabla) {
     errorMessage(error_message);
 
     const table = document.getElementById(`${tabla}`);
-    const tbody = table.children[1];
-    const tfoot = table.children[2];
+    const tbody = table.querySelector('tbody');
+    const tfoot = table.querySelector('tfoot');
+    
+    if ( tfoot ) {
+        tfoot.children[0].children[1].textContent = 'S/. ' + 0;
+    }
+
     tbody.innerHTML = '';
-    tfoot.children[0].children[1].textContent = 'S/. ' + 0;
 }
 
 function clearName(input) {
@@ -419,19 +608,57 @@ function restoreTableOfInterface() {
     selected_rows = [];
 }
 
-function searchProduct() {
-    let inputs = [];
-    const id = document.getElementById('id_product_update_search').value;
-    const name = document.getElementById('name_product_update_search').value;
-    const mark = document.getElementById('mark_product_update_search').value;
-    const price = document.getElementById('price_product_update_search').value;
-    const stock = document.getElementById('stock_product_update_search').value;
+function searchProduct(tabla, inputs) {
+    let inputs_search = [];
+    let rows_not_found = [];
+    let rows_found = [];
+    
+    const table = document.getElementById(tabla);
 
-    if (id.trim() !== '') inputs.push({ name: 'id', data: id });
-    if (name.trim() !== '') inputs.push({ name: 'nombre', data: name });
-    if (mark.trim() !== '') inputs.push({ name: 'marca', data: mark });
-    if (price.trim() !== '') inputs.push({ price: 'precio', data: price });
-    if (stock.trim() !== '') inputs.push({ name: 'stock', data: stock });
+    const id = document.getElementById(inputs[0]).value;
+    const name = document.getElementById(inputs[1]).value;
+    const price = document.getElementById(inputs[2]).value;
+    const stock = document.getElementById(inputs[3]).value;
+    const mark = document.getElementById(inputs[4]).value;
 
-    api.searchProduct(inputs);
+    if (id.trim() !== '') inputs_search.push({ location: 0, value: id });
+    if (name.trim() !== '') inputs_search.push({ location: 1, value: name });
+    if (price.trim() !== '') inputs_search.push({ location: 2, value: price });
+    if (stock.trim() !== '') inputs_search.push({ location: 3, value: stock });
+    if (mark.trim() !== '') inputs_search.push({ location: 4, value: mark });
+
+    if (inputs_search.length === 0) {
+        loadProducts(tabla);
+        return;
+    }
+
+    const generator = forEachTable(table);
+    let row = generator.next();
+
+    while ( !row.done ) {
+        let verify = true;
+        const cells = row.value;
+        inputs_search.forEach(input => {
+            if (!cells[input.location].textContent.toLowerCase().includes(input.value.toLowerCase())) {
+                verify = false;
+            }
+        });
+
+        if ( verify ) {
+            rows_found.push(cells);
+        } else {
+            rows_not_found.push(cells);
+        }
+        row = generator.next();
+    }
+
+    rows_not_found.forEach(row => {
+        row[0].parentElement.classList.add('display-none');
+        row[0].parentElement.classList.remove('selected-row');
+        selected_rows = selected_rows.filter(r => r !== row[0].parentElement);
+    });
+
+    rows_found.forEach(row => {
+        row[0].parentElement.classList.remove('display-none');
+    });
 }

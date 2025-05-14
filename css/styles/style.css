@@ -166,7 +166,7 @@ body {
     flex-direction: row;
     margin: 0;
     padding: 0 2%;
-    z-index: 1000;
+    z-index: 998;
 }
 
 .menu-option a {
@@ -245,7 +245,7 @@ body {
     width: 100vw;
 }
 
-#error-message {
+.error {
     color: rgb(255, 0, 0);
     font-weight: 900;
 }

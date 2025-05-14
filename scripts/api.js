@@ -47,6 +47,64 @@ export function saveSale(name_client, products_list) { // Recibe el nombre y la 
     });
 }
 
+export function addProduct(productData) { // Recibe un objeto con los datos del nuevo producto
+     fetch('/products-api', { // <-- Usamos la misma ruta, pero el método POST
+         method: 'POST', // Usamos el método POST para crear un nuevo recurso
+         headers: {
+             'Content-Type': 'application/json' // Le decimos al servidor que le enviaremos datos en formato JSON
+         },
+         body: JSON.stringify(productData) // Convertimos el objeto de datos (nombre, marca, precio, stock) a JSON para enviar
+     })
+     .then(response => {
+         // Manejar la respuesta del servidor (éxito o error)
+         if (!response.ok) {
+              // Si la respuesta del servidor no es OK, intentamos leer el mensaje de error
+              return response.text().then(text => {
+                   const errorDetail = text || response.statusText;
+                   throw new Error(`Error ${response.status}: ${errorDetail}`);
+              });
+         }
+         // Si la respuesta fue OK (ej: 200), leemos el cuerpo como texto (esperando un mensaje de éxito del backend)
+         return response.text(); // O podrías esperar un JSON si el backend envía el ID del nuevo producto
+     })
+     .then(msg => { // Recibe el mensaje (éxito o error)
+         alert(msg); // Lo muestra en una alerta al usuario
+         // Si la adición fue exitosa, la lógica en main.js debería recargar la lista.
+     })
+     .catch(error => { // Si falla la comunicación o el servidor dio error
+         alert('Hubo un error al añadir el producto: ' + error.message); // Muestra el error más detallado
+         console.error('Error al añadir el producto:', error); // Logea el error completo
+     });
+ }
+
+export function deleteProducts(productIds) { // Recibe un array de IDs de productos a eliminar
+     // Retorna la Promesa de fetch para que quien llame (main.js) maneje la respuesta.
+     return fetch('/products-api', { // Asegúrate de que esta ruta coincida con tu routes.js DELETE endpoint
+         method: 'DELETE', // Método HTTP DELETE
+         headers: {
+             'Content-Type': 'application/json' // Indicamos que enviamos JSON
+         },
+         // Aunque no es estándar enviar body con DELETE, es práctico con fetch para IDs múltiples.
+         // Tu backend (routes.js) debe estar preparado para leer el cuerpo de la petición DELETE.
+         body: JSON.stringify({ ids: productIds }) // Enviamos un objeto con la lista de IDs
+     })
+     .then(response => {
+         // Si la respuesta NO es exitosa (ej: 400, 404, 409, 500), leemos el cuerpo y lanzamos una excepción
+         if (!response.ok) {
+              return response.text().then(text => {
+                   const errorDetail = text || response.statusText;
+                   // Creamos un objeto Error con el mensaje del servidor y el estado HTTP
+                   const error = new Error(errorDetail);
+                   error.status = response.status; // Opcional: Añadir el estado HTTP
+                   throw error; // Lanzamos la excepción para que el .catch en main.js la capture
+              });
+         }
+         // Si la respuesta es exitosa (ej: 200), leemos el cuerpo (mensaje de éxito del backend) y lo retornamos
+         return response.text();
+     });
+     // NOTA: El .catch() ya NO está aquí. Lo manejará la función deleteSelectedProducts en main.js.
+ }
+
 export function getStock(obj) {
     const input = document.getElementById(`${obj}`);
     const id = input.parentElement.querySelector('select').value;

@@ -1,48 +1,8 @@
-// document.addEventListener('DOMContentLoaded', function() {
-//     const loginForm = document.querySelector('.login-form');
-//     const usernameInput = document.getElementById('username');
-//     const passwordInput = document.getElementById('password');
-
-//     loginForm.addEventListener('submit', async function(e) {
-//         e.preventDefault();
-
-//         const userData = {
-//             username: usernameInput.value,
-//             password: passwordInput.value
-//         };
-
-//         try {
-//             const response = await fetch('http://tu-servidor/api/login', {
-//                 method: 'POST',
-//                 headers: {
-//                     'Content-Type': 'application/json'
-//                 },
-//                 body: JSON.stringify(userData)
-//             });
-
-//             const data = await response.json();
-
-//             if (response.ok) {
-//                 // Login exitoso
-//                 localStorage.setItem('user', JSON.stringify(data.user));
-//                 localStorage.setItem('token', data.token); // Si usas tokens
-//                 window.location.href = '../pages/index.html'; // Redirección a Home
-//             } else {
-//                 // Login fallido
-//                 alert('Usuario o contraseña incorrectos');
-//             }
-//         } catch (error) {
-//             console.error('Error:', error);
-//             alert('Error al intentar iniciar sesión');
-//         }
-//     });
-// });
-
 document.addEventListener("DOMContentLoaded", function () {
 const loginForm = document.querySelector(".login-form");
 const usernameInput = document.getElementById("username");
 const passwordInput = document.getElementById("password");
-const messageArea = document.getElementById("login-message-area"); // Nuevo: Referencia al área de mensajes
+const messageArea = document.getElementById("login-message-area");
 
   // Función para mostrar mensajes
 function showMessage(message, isError = true) {

@@ -40,7 +40,7 @@
             <h1 class="title font30"> Products </h1>
         </div>
 
-        <form id="form" class="form">
+        <form id="form_add_product" class="form">
             <div class="display-inline-flex">
                 <div class="display-block">
                     <input type="text" name="name_product_add" id="name_product_add" class="input margin-right10px" placeholder=" " required>
@@ -82,8 +82,8 @@
             </div>
 
             <div class="buttons margin-bottom20px">
-                <button type="button" class="button" onclick="toggleInterface('interface-update'), loadProducts('products_table')"> Update </button>
-                <button type="button" class="button" onclick="toggleInterface('interface-delete'), loadProducts('products_table_delete')"> Delete </button>
+                <button type="button" class="button" onclick="toggleInterface('interface-update'), loadProducts('products_table'), errorMessage(document.getElementById('error_message_update'))"> Update </button>
+                <button type="button" class="button" onclick="toggleInterface('interface-delete'), loadProducts('products_table_delete'), errorMessage(document.getElementById('error_message_delete'))"> Delete </button>
             </div>
         </form>
     </div>
@@ -107,7 +107,7 @@
                             </div>
 
                             <div class="display-block">
-                                <input type="number" name="id_product_update_search" id="id_product_update_search" class="input display-flex width60px justify-center-self" placeholder=" " min="1" step="1">
+                                <input type="number" name="id_product_update_search" id="id_product_update_search" class="input display-flex width60px justify-center-self" placeholder=" " min="1" step="1" oninput="searchProduct('products_table', ['id_product_update_search', 'name_product_update_search', 'price_product_update_search', 'stock_product_update_search', 'mark_product_update_search'])">
                                 <label for="id_product_update_search" class="label justify-center display-flex"> ID </label>
                             </div>
                         </div>
@@ -119,22 +119,22 @@
 
                             <div class="display-inline-flex">
                                 <div class="display-block">
-                                    <input type="text" name="name_product_update_search" id="name_product_update_search" class="input" placeholder=" ">
+                                    <input type="text" name="name_product_update_search" id="name_product_update_search" class="input" placeholder=" " oninput="searchProduct('products_table', ['id_product_update_search', 'name_product_update_search', 'price_product_update_search', 'stock_product_update_search', 'mark_product_update_search'])">
                                     <label for="name_product_update_search" class="label justify-center display-flex"> Product </label>
                                 </div>
                                 
                                 <div class="display-block">
-                                    <input type="number" name="price_product_update_search" id="price_product_update_search" class="input width70px" placeholder=" ">
+                                    <input type="number" name="price_product_update_search" id="price_product_update_search" class="input width70px" placeholder=" " min="0.01" step="0.01" oninput="searchProduct('products_table', ['id_product_update_search', 'name_product_update_search', 'price_product_update_search', 'stock_product_update_search', 'mark_product_update_search'])">
                                     <label for="price_product_update_search" class="label justify-center display-flex"> Price </label>
                                 </div>
 
                                 <div class="display-block">
-                                    <input type="text" name="mark_product_update_search" id="mark_product_update_search" class="input" placeholder=" ">
+                                    <input type="text" name="mark_product_update_search" id="mark_product_update_search" class="input" placeholder=" " oninput="searchProduct('products_table', ['id_product_update_search', 'name_product_update_search', 'price_product_update_search', 'stock_product_update_search', 'mark_product_update_search'])">
                                     <label for="mark_product_update_search" class="label justify-center display-flex"> Mark </label>
                                 </div>
 
                                 <div class="display-block">
-                                    <input type="number" name="sotock_product_update_search" id="stock_product_update_search" class="input width70px" placeholder=" ">
+                                    <input type="number" name="stock_product_update_search" id="stock_product_update_search" class="input width70px" placeholder=" " min="1" step="1" oninput="searchProduct('products_table', ['id_product_update_search', 'name_product_update_search', 'price_product_update_search', 'stock_product_update_search', 'mark_product_update_search'])">
                                     <label for="stock_product_update_search" class="label justify-center display-flex"> Stock </label>
                                 </div>
                             </div>
@@ -149,7 +149,7 @@
 
                     <div class="display-inline-flex justify-center width100">
                         <div class="display-block margin-right20px margin-left20px">
-                            <input type="text" name="name_product_update" id="name_product_update" class="input" placeholder=" " required oninput="errorMessage()">
+                            <input type="text" name="name_product_update" id="name_product_update" class="input" placeholder=" " required>
                             <label for="name_product_update" class="label justify-center display-flex"> Product </label>
                         </div>
 
@@ -170,7 +170,7 @@
 
                         <input type="submit" class="button margin-bottom20px" value="Update">
                     </div>
-                    <p id="error_message_update" class="justify-center-self"></p>
+                    <p id="error_message_update" class="justify-center-self error"></p>
                 </div>
 
                 <div class="products-selection justify-center width100">
@@ -217,7 +217,7 @@
                             </div>
 
                             <div class="display-block">
-                                <input type="number" name="id_product_update_search" id="id_product_delete_search" class="input display-flex width60px justify-center-self" placeholder=" " min="1" step="1">
+                                <input type="number" name="id_product_update_search" id="id_product_delete_search" class="input display-flex width60px justify-center-self" placeholder=" " min="1" step="1" oninput="searchProduct('products_table_delete', ['id_product_delete_search', 'name_product_delete_search','price_product_delete_search','stock_product_delete_search','mark_product_delete_search'])">
                                 <label for="id_product_update_search" class="label justify-center display-flex"> ID </label>
                             </div>
                         </div>
@@ -229,23 +229,23 @@
 
                             <div class="display-inline-flex">
                                 <div class="display-block">
-                                    <input type="text" name="name_product_update_search" id="name_product_delete_search" class="input" placeholder=" ">
-                                    <label for="name_product_update_search" class="label justify-center display-flex"> Product </label>
+                                    <input type="text" name="name_product_delete_search" id="name_product_delete_search" class="input" placeholder=" " oninput="searchProduct('products_table_delete', ['id_product_delete_search', 'name_product_delete_search','price_product_delete_search','stock_product_delete_search','mark_product_delete_search'])">
+                                    <label for="name_product_delete_search" class="label justify-center display-flex"> Product </label>
                                 </div>
                                 
                                 <div class="display-block">
-                                    <input type="number" name="price_product_update_search" id="price_product_delete_search" class="input width70px" placeholder=" ">
-                                    <label for="price_product_update_search" class="label justify-center display-flex"> Price </label>
+                                    <input type="number" name="price_product_delete_search" id="price_product_delete_search" class="input width70px" placeholder=" " oninput="searchProduct('products_table_delete', ['id_product_delete_search', 'name_product_delete_search','price_product_delete_search','stock_product_delete_search','mark_product_delete_search'])">
+                                    <label for="price_product_delete_search" class="label justify-center display-flex"> Price </label>
                                 </div>
 
                                 <div class="display-block">
-                                    <input type="text" name="mark_product_update_search" id="mark_product_delete_search" class="input" placeholder=" ">
-                                    <label for="mark_product_update_search" class="label justify-center display-flex"> Mark </label>
+                                    <input type="text" name="mark_product_delete_search" id="mark_product_delete_search" class="input" placeholder=" " oninput="searchProduct('products_table_delete', ['id_product_delete_search', 'name_product_delete_search','price_product_delete_search','stock_product_delete_search','mark_product_delete_search'])">
+                                    <label for="mark_product_delete_search" class="label justify-center display-flex"> Mark </label>
                                 </div>
 
                                 <div class="display-block">
-                                    <input type="number" name="sotock_product_update_search" id="stock_product_delete_search" class="input width70px" placeholder=" ">
-                                    <label for="stock_product_update_search" class="label justify-center display-flex"> Stock </label>
+                                    <input type="number" name="sotock_product_delete_search" id="stock_product_delete_search" class="input width70px" placeholder=" " oninput="searchProduct('products_table_delete', ['id_product_delete_search', 'name_product_delete_search','price_product_delete_search','stock_product_delete_search','mark_product_delete_search'])">
+                                    <label for="stock_product_delete_search" class="label justify-center display-flex"> Stock </label>
                                 </div>
                             </div>
                         </div>
@@ -253,9 +253,10 @@
                 </section>
 
                 <div>
-                    <input type="submit" class="button margin-bottom20px margin-top20px" value="Delete">
-                    <p id="error_message_delete" class="justify-center-self"></p>
+                    <input type="submit" class="button margin-top20px" value="Delete">
                 </div>
+                
+                <p id="error_message_delete" class="error justify-center-self"></p>
 
                 <div class="products-selection justify-center width100">
                     <table class="products-container width90 margin-bottom2vh max-height500px min-height350px height100" id="products_table_delete">
@@ -279,6 +280,37 @@
                     <button type="button" class="button margin-bottom10px" onclick="toggleInterface('interface-delete'), restoreTableOfInterface()"> Cancel </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <div id="confirm-interface" class="interface hidden">
+        <div class="form-container width80">
+            <div class="title-container">
+                <h4> Are you sure you want to delete these products? </h4>
+            </div>
+
+            <div class="products-selection justify-center width100">
+                <table class="products-container width90 margin-bottom2vh max-height500px" id="products_table_delete_confirm">
+                    <thead>
+                        <tr class="table-header-products">
+                            <th class="border-right font15"> Id </th>
+                            <th class="font15"> Product </th>
+                            <th class="border-left font15"> Price </th>
+                            <th class="border-left font15"> Stock </th>
+                            <th class="border-left font15"> Mark </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <!-- Aqui van los productos -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="buttons margin-bottom30px">
+                <button type="button" class="button" onclick="deleteSelectedProducts()"> Delete </button>
+                <button class="button" onclick="toggleInterface('confirm-interface')"> Cancel </button>
+            </div>
         </div>
     </div>
 

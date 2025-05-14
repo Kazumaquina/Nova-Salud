@@ -222,38 +222,20 @@ function handle(req, res) {
 
           if (results.length > 0) {
             const user = results[0];
-            // IMPORTANTE: Aquí deberías comparar la contraseña hasheada.
-            // Ejemplo con texto plano (NO USAR EN PRODUCCIÓN):
-            if (password === user.password) {
-            // // Ejemplo con bcrypt (RECOMENDADO):
-            // bcrypt.compare(password, user.password_hash, (bcryptErr, match) => {
-            //   if (bcryptErr) {
-            //     console.error('Error comparando hash:', bcryptErr);
-            //     res.writeHead(500, { 'Content-Type': 'application/json' });
-            //     res.end(JSON.stringify({ message: 'Error interno del servidor' }));
-            //     return;
-            //   }
-            //   if (match) {
-                // Login exitoso
+            if (password === user.password) {            
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 // Devuelve solo la información necesaria del usuario, no la contraseña.
                 // Y un token si lo usas.
                 res.end(JSON.stringify({
                   message: 'Login exitoso',
-                  user: { id: user.ID, username: user.username /* otros datos seguros */ },
+                  user: { id: user.ID, username: user.username},
                   // token: 'tu_jwt_token_aqui' // Si generas un token
                 }));
-            //   } else {
-            //     // Contraseña incorrecta
-            //     res.writeHead(401, { 'Content-Type': 'application/json' });
-            //     res.end(JSON.stringify({ message: 'Usuario o contraseña incorrectos' }));
-            //   }
-            // });
-            } else {
-              // Contraseña incorrecta (usando comparación de texto plano)
-              res.writeHead(401, { 'Content-Type': 'application/json' });
-              res.end(JSON.stringify({ message: 'Usuario o contraseña incorrectos' }));
-            }
+              } else {
+                // Contraseña incorrecta
+                res.writeHead(401, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ message: 'Usuario o contraseña incorrectos' }));
+              }
           } else {
             // Usuario no encontrado
             res.writeHead(401, { 'Content-Type': 'application/json' });
@@ -341,41 +323,156 @@ function handle(req, res) {
                 res.end('Datos de venta recibidos inválidos.');
             }
         });
-    } else if ( req.url === "/search" && req.method === "POST") {
-        let body = "";
 
-        req.on("data", (chunk) => {
-            body += chunk;
-        });
+  } else if ( req.url === "/search" && req.method === "POST") {
+      let body = "";
 
-        req.on("end", () => {
-            try {
-                const data = JSON.parse(body);
-                const { search } = data;
+      req.on("data", (chunk) => {
+          body += chunk;
+      });
 
-                if (!search) {
-                    res.writeHead(400, { "Content-Type": "text/plain" });
-                    res.end("Datos de venta incompletos o inválidos.");
-                    return;
-                }
+      req.on("end", () => {
+          try {
+              const data = JSON.parse(body);
+              const { search } = data;
 
-                db.query("SELECT * FROM productos_farmacia WHERE nombre LIKE ?", [`%${search}%`], (err, result) => {
-                    if (err) {
-                        console.error("Error al buscar productos:", err);
-                        res.writeHead(500, { "Content-Type": "text/plain" });
-                        res.end("Error al buscar productos.");
-                        return;
-                    }
+              if (!search) {
+                  res.writeHead(400, { "Content-Type": "text/plain" });
+                  res.end("Datos de venta incompletos o inválidos.");
+                  return;
+              }
 
-                    res.writeHead(200, { "Content-Type": "application/json" });
-                    res.end(JSON.stringify(result));
-                });
-            } catch (err) {
-                console.error("Error al parsear JSON de venta:", err);
-                res.writeHead(400, { "Content-Type": "text/plain" });
-                res.end("Datos de venta recibidos inválidos.");
-            }
-        });
+              db.query("SELECT * FROM productos_farmacia WHERE nombre LIKE ?", [`%${search}%`], (err, result) => {
+                  if (err) {
+                      console.error("Error al buscar productos:", err);
+                      res.writeHead(500, { "Content-Type": "text/plain" });
+                      res.end("Error al buscar productos.");
+                      return;
+                  }
+
+                  res.writeHead(200, { "Content-Type": "application/json" });
+                  res.end(JSON.stringify(result));
+              });
+          } catch (err) {
+              console.error("Error al parsear JSON de venta:", err);
+              res.writeHead(400, { "Content-Type": "text/plain" });
+              res.end("Datos de venta recibidos inválidos.");
+          }
+      });
+
+    } else if (req.url === '/products-api' && req.method === 'POST') { // <-- La ruta que espera la petición POST de api.js
+      let body = '';
+
+      req.on('data', chunk => {
+          body += chunk;
+      });
+
+      req.on('end', () => {
+          try {
+              const data = JSON.parse(body); // Espera el JSON con los datos del nuevo producto (nombre, marca, precio, stock)
+
+              // Validar los datos recibidos del nuevo producto
+              // Usamos parseInt/parseFloat aquí para asegurar que son números, aunque ya se hizo en frontend, es buena práctica validar en backend.
+              const nombre = data.nombre;
+              const marca = data.marca;
+              const precio = parseFloat(data.precio);
+              const stock = parseInt(data.stock);
+
+              if (!nombre || typeof nombre !== 'string' || nombre.trim() === '' ||
+                  !marca || typeof marca !== 'string' || marca.trim() === '' ||
+                  isNaN(precio) || precio <= 0 || // Precio debe ser mayor que 0 para añadir
+                  isNaN(stock) || stock < 0) { // Stock puede ser 0
+                  res.writeHead(400, { 'Content-Type': 'text/plain' });
+                  res.end('Datos de producto inválidos o incompletos para añadir.');
+                  return;
+              }
+
+              // Ejecutar la consulta SQL para insertar el nuevo producto
+              // Usamos las columnas exactas de tu tabla 'productos_farmacia': 'nombre', 'marca', 'precio', 'stock'. El 'id' es AUTO_INCREMENT.
+              db.query('INSERT INTO productos_farmacia (nombre, marca, precio, stock) VALUES (?, ?, ?, ?)', [nombre, marca, precio, stock], (err, result) => {
+                  if (err) {
+                      console.error('Error al insertar nuevo producto en DB:', err);
+                      res.writeHead(500, { 'Content-Type': 'text/plain' });
+                      res.end('Error al añadir el producto a la base de datos.');
+                  } else {
+                      // result.insertId contiene el ID del nuevo producto insertado
+                      const newProductId = result.insertId;
+                      console.log(`Nuevo producto añadido con éxito. ID: ${newProductId}`);
+                      res.writeHead(201, { 'Content-Type': 'text/plain' }); // Código 201 Created es apropiado para creación
+                      res.end('Producto añadido con éxito.'); // Mensaje de éxito
+                      // Opcional: Podrías enviar el ID del nuevo producto en la respuesta JSON:
+                      // res.writeHead(201, { 'Content-Type': 'application/json' });
+                      // res.end(JSON.stringify({ message: 'Producto añadido con éxito', id: newProductId }));
+                  }
+              });
+
+          } catch (err) { // Error al parsear el JSON inicial
+              console.error('Error al parsear JSON de nuevo producto:', err);
+              res.writeHead(400, { 'Content-Type': 'text/plain' });
+              res.end('Datos de nuevo producto recibidos inválidos.');
+          }
+      });
+      }else if (req.url === '/products-api' && req.method === 'DELETE') { // <-- La ruta que espera la petición DELETE
+          let body = '';
+
+          req.on('data', chunk => {
+              body += chunk;
+          });
+
+          req.on('end', () => {
+              try {
+                  const data = JSON.parse(body); // Espera un JSON con un array de IDs: { ids: [...] }
+                  const productIdsToDelete = data.ids;
+
+                  // Validar los datos recibidos - Asegúrate de que sea un array y contenga números
+                  if (!Array.isArray(productIdsToDelete) || productIdsToDelete.length === 0) {
+                      res.writeHead(400, { 'Content-Type': 'text/plain' });
+                      res.end('Datos de eliminación inválidos: se espera una lista de IDs.');
+                      return;
+                  }
+
+                  // Filtrar IDs no válidos (no números o <= 0)
+                  const validIds = productIdsToDelete
+                                  .map(id => parseInt(id))
+                                  .filter(id => !isNaN(id) && id > 0);
+
+                  if (validIds.length === 0) {
+                      res.writeHead(400, { 'Content-Type': 'text/plain' });
+                      res.end('Ningún ID válido proporcionado para eliminar.');
+                      return;
+                  }
+
+
+                  // Crear la consulta SQL DELETE. Usamos 'IN (?)' para eliminar múltiples IDs.
+                  // El paquete mysql2 manejará automáticamente el array para generar '(id1, id2, id3)'.
+                  db.query('DELETE FROM productos_farmacia WHERE id IN (?)', [validIds], (err, result) => {
+                      if (err) {
+                          console.error('Error al eliminar productos en DB:', err);
+                          // --- Manejo específico para errores de clave foránea ---
+                          if (err.code === 'ER_ROW_IS_REFERENCED_2' || err.errno === 1451) {
+                              res.writeHead(409, { 'Content-Type': 'text/plain' }); // 409 Conflict
+                              res.end('No se pueden eliminar algunos productos porque están asociados a ventas existentes.');
+                          } else {
+                              // Otros errores de base de datos
+                              res.writeHead(500, { 'Content-Type': 'text/plain' });
+                              res.end('Error al eliminar los productos de la base de datos.');
+                          }
+                      } else {
+                          // result.affectedRows te dice cuántas filas fueron eliminadas
+                          const deletedCount = result.affectedRows;
+                          console.log(`Productos eliminados con éxito. Cantidad: ${deletedCount}`);
+                          res.writeHead(200, { 'Content-Type': 'text/plain' });
+                          res.end(`${deletedCount} producto(s) eliminado(s) con éxito.`); // Mensaje de éxito
+                      }
+                  });
+
+              } catch (err) { // Error al parsear el JSON inicial
+                  console.error('Error al parsear JSON de IDs para eliminar:', err);
+                  res.writeHead(400, { 'Content-Type': 'text/plain' });
+                  res.end('Datos de eliminación recibidos inválidos.');
+              }
+          });
+
     } else {
     res.writeHead(404);
     res.end('Ruta no encontrada');
