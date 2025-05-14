@@ -1,4 +1,6 @@
 const db = require('./db');
+const url = require('url');
+const { generateInvoicePdf } = require('./pdf');
 
 function handle(req, res) {
   if ( req.url === '/products' && req.method === 'GET' ) {
@@ -20,16 +22,13 @@ function handle(req, res) {
         }
   } else if ( req.url === '/stock' && req.method === 'POST' ) {
     let body = '';
-
     req.on('data', chunk => {
       body += chunk;
     });
-
     req.on('end', () => {
         try{
             let data;
             const contentType = req.headers['content-type'];
-
             if (contentType === 'application/json') {
             data = JSON.parse(body);
             } else if (contentType === 'application/x-www-form-urlencoded') {
@@ -37,9 +36,7 @@ function handle(req, res) {
             } else {
             throw new Error('Formato no soportado');
             }
-
             const { id } = data;
-
             db.query('CALL getStock(?);', [id], (err, result) => {
             if (err) {
                 console.error(err);
@@ -79,16 +76,13 @@ function handle(req, res) {
       }
   } else if (req.url === '/enviar' && req.method === 'POST') {
     let body = '';
-
     req.on('data', chunk => {
       body += chunk;
     });
-
     req.on('end', () => {
       try {
         let data;
         const contentType = req.headers['content-type'];
-
         if (contentType === 'application/json') {
           data = JSON.parse(body);
         } else if (contentType === 'application/x-www-form-urlencoded') {
@@ -96,9 +90,7 @@ function handle(req, res) {
         } else {
           throw new Error('Formato no soportado');
         }
-
         const {id, username, password} = data;
-
         db.query('INSERT INTO usuarios (id, username, password) VALUES (?, ?, ?)', [id, username, password], (err, result) => {
           if (err) {
             console.error(err);
@@ -109,7 +101,6 @@ function handle(req, res) {
             res.end('Datos guardados correctamente.');
           }
         });
-
       } catch (err) {
         console.error('Error de parseo:', err.message);
         res.writeHead(400);
@@ -118,16 +109,13 @@ function handle(req, res) {
     });
   } else if (req.url === '/enviar' && req.method === 'PUT') {
     let body = '';
-
     req.on('data', chunk => {
       body += chunk;
     });
-
     req.on('end', () => {
       try {
         let data;
         const contentType = req.headers['content-type'];
-
         if (contentType === 'application/json') {
           data = JSON.parse(body);
         } else if (contentType === 'application/x-www-form-urlencoded') {
@@ -135,9 +123,7 @@ function handle(req, res) {
         } else {
           throw new Error('Formato no soportado');
         }
-
         const { id, nombre, correo, mensaje } = data;
-
         db.query('UPDATE usuarios SET username = ?, password = ? WHERE id = ?', [username, password, id], (err, result) => {
           if (err) {
             console.error(err);
@@ -148,7 +134,6 @@ function handle(req, res) {
             res.end('Datos actualizados correctamente.');
           }
         });
-
       } catch (err) {
         console.error('Error de parseo:', err.message);
         res.writeHead(400);
@@ -157,16 +142,13 @@ function handle(req, res) {
     });
   } else if ( req.url === '/enviar' && req.method === 'DELETE') {
     let body = '';
-
     req.on('data', chunk => {
       body += chunk;
     });
-
     req.on('end', () => {
       try {
         let data;
         const contentType = req.headers['content-type'];
-
         if (contentType === 'application/json') {
           data = JSON.parse(body);
         } else if (contentType === 'application/x-www-form-urlencoded') {
@@ -174,9 +156,7 @@ function handle(req, res) {
         } else {
           throw new Error('Formato no soportado');
         }
-
         const { id } = data;
-
         db.query('DELETE FROM usuarios WHERE id = ?', [id], (err, result) => {
           if (err) {
             console.error(err);
@@ -187,7 +167,6 @@ function handle(req, res) {
             res.end('Datos eliminados correctamente.');
           }
         });
-
       } catch (err) {
         console.error('Error de parseo:', err.message);
         res.writeHead(400);
@@ -199,19 +178,15 @@ function handle(req, res) {
     req.on('data', chunk => {
       body += chunk;
     });
-
     req.on('end', () => {
       try {
         const userData = JSON.parse(body);
         const { username, password } = userData;
-
         if (!username || !password) {
           res.writeHead(400, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ message: 'Usuario y contraseña son requeridos' }));
           return;
         }
-
-        // Consulta a la base de datos para encontrar al usuario
         db.query('SELECT * FROM usuarios WHERE username = ?', [username], (err, results) => {
           if (err) {
             console.error('Error en la consulta de login:', err);
@@ -219,129 +194,109 @@ function handle(req, res) {
             res.end(JSON.stringify({ message: 'Error interno del servidor' }));
             return;
           }
-
           if (results.length > 0) {
             const user = results[0];
-            if (password === user.password) {            
+            if (password === user.password) {
                 res.writeHead(200, { 'Content-Type': 'application/json' });
-                // Devuelve solo la información necesaria del usuario, no la contraseña.
-                // Y un token si lo usas.
                 res.end(JSON.stringify({
                   message: 'Login exitoso',
                   user: { id: user.ID, username: user.username},
-                  // token: 'tu_jwt_token_aqui' // Si generas un token
                 }));
               } else {
-                // Contraseña incorrecta
                 res.writeHead(401, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ message: 'Usuario o contraseña incorrectos' }));
               }
           } else {
-            // Usuario no encontrado
             res.writeHead(401, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ message: 'Usuario o contraseña incorrectos' })); // Mensaje genérico por seguridad
+            res.end(JSON.stringify({ message: 'Usuario o contraseña incorrectos' }));
           }
         });
-
       } catch (parseError) {
         console.error('Error al parsear JSON de login:', parseError);
         res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ message: 'Datos de login inválidos' }));
       }
     });
-  }else if (req.url === '/register-sale' && req.method === 'POST') { 
+  }else if (req.url === '/register-sale' && req.method === 'POST') {
         let body = '';
-
         req.on('data', chunk => {
             body += chunk;
         });
-
         req.on('end', () => {
             try {
                 const data = JSON.parse(body);
-                const { clientName, products } = data; 
-
+                const { clientName, products } = data;
                 if (!clientName || !products || !Array.isArray(products) || products.length === 0) {
                     res.writeHead(400, { 'Content-Type': 'text/plain' });
                     res.end('Datos de venta incompletos o inválidos.');
                     return;
                 }
-
-              
                 const saleDate = new Date();
                 db.query('INSERT INTO ventas (fecha, nombre_cliente) VALUES (?, ?)', [saleDate, clientName], (err, result) => {
                     if (err) {
                         console.error('Error al insertar venta principal:', err);
                         res.writeHead(500, { 'Content-Type': 'text/plain' });
                         res.end('Error al guardar la venta principal.');
-                        return; 
+                        return;
                     }
-
-                    const ventaId = result.insertId; 
-
+                    const ventaId = result.insertId;
                     let itemsProcessed = 0;
                     const totalItems = products.length;
-
                     products.forEach(item => {
                         const producto_id = parseInt(item.id);
                         const cantidad = parseInt(item.cantidad);
-                        const precio_unitario = parseFloat(item.precio); 
-
+                        const precio_unitario = parseFloat(item.precio);
                         if (isNaN(producto_id) || isNaN(cantidad) || cantidad <= 0 || isNaN(precio_unitario) || precio_unitario < 0) {
                             console.error('Datos de item de venta inválidos:', item);
                             itemsProcessed++;
-                            if (itemsProcessed === totalItems) { 
-                                res.writeHead(400, { 'Content-Type': 'text/plain' }); 
-                                res.end('Algunos productos en la venta tenían datos inválidos.');
+                            if (itemsProcessed === totalItems) {
+                                    // --- NUEVA RESPUESTA FINAL DE /register-sale ---
+                                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                                    res.end(JSON.stringify({
+                                      message: 'Venta registrada con éxito.',
+                                      ventaId: ventaId // Envía el ID de la venta al frontend
+                                    }));
+                                    console.log(`Venta ${ventaId} registrada con éxito.`);
                             }
-                            return; 
+                            return;
                         }
-
                         db.query('INSERT INTO detalle_venta (venta_id, producto_id, cantidad, precio_unitario) VALUES (?, ?, ?, ?)', [ventaId, producto_id, cantidad, precio_unitario], (err) => {
                             if (err) {
                                 console.error('Error al insertar detalle de venta:', err);
                             }
-
                             db.query('UPDATE productos_farmacia SET stock = stock - ? WHERE id = ?', [cantidad, producto_id], (err) => {
                                 if (err) {
                                     console.error('Error al actualizar stock:', err);
                                 }
-
                                 itemsProcessed++;
                                 if (itemsProcessed === totalItems) {
                                     res.writeHead(200, { 'Content-Type': 'text/plain' });
-                                    res.end('Intento de registrar venta procesado. Verifique errores.'); 
+                                    res.end('Intento de registrar venta procesado. Verifique errores.');
                                 }
                             });
                         });
                     });
                 });
-
-            } catch (err) { 
+            } catch (err) {
                 console.error('Error al parsear JSON de venta:', err);
                 res.writeHead(400, { 'Content-Type': 'text/plain' });
                 res.end('Datos de venta recibidos inválidos.');
             }
         });
-
   } else if ( req.url === "/search" && req.method === "POST") {
       let body = "";
-
       req.on("data", (chunk) => {
           body += chunk;
       });
-
       req.on("end", () => {
           try {
               const data = JSON.parse(body);
               const { search } = data;
-
               if (!search) {
                   res.writeHead(400, { "Content-Type": "text/plain" });
                   res.end("Datos de venta incompletos o inválidos.");
                   return;
               }
-
               db.query("SELECT * FROM productos_farmacia WHERE nombre LIKE ?", [`%${search}%`], (err, result) => {
                   if (err) {
                       console.error("Error al buscar productos:", err);
@@ -349,7 +304,6 @@ function handle(req, res) {
                       res.end("Error al buscar productos.");
                       return;
                   }
-
                   res.writeHead(200, { "Content-Type": "application/json" });
                   res.end(JSON.stringify(result));
               });
@@ -359,124 +313,184 @@ function handle(req, res) {
               res.end("Datos de venta recibidos inválidos.");
           }
       });
-
-    } else if (req.url === '/products-api' && req.method === 'POST') { // <-- La ruta que espera la petición POST de api.js
+    } else if (req.url === '/products-api' && req.method === 'POST') {
       let body = '';
-
       req.on('data', chunk => {
           body += chunk;
       });
-
       req.on('end', () => {
           try {
-              const data = JSON.parse(body); // Espera el JSON con los datos del nuevo producto (nombre, marca, precio, stock)
-
-              // Validar los datos recibidos del nuevo producto
-              // Usamos parseInt/parseFloat aquí para asegurar que son números, aunque ya se hizo en frontend, es buena práctica validar en backend.
+              const data = JSON.parse(body);
               const nombre = data.nombre;
               const marca = data.marca;
               const precio = parseFloat(data.precio);
               const stock = parseInt(data.stock);
-
               if (!nombre || typeof nombre !== 'string' || nombre.trim() === '' ||
                   !marca || typeof marca !== 'string' || marca.trim() === '' ||
-                  isNaN(precio) || precio <= 0 || // Precio debe ser mayor que 0 para añadir
-                  isNaN(stock) || stock < 0) { // Stock puede ser 0
+                  isNaN(precio) || precio <= 0 ||
+                  isNaN(stock) || stock < 0) {
                   res.writeHead(400, { 'Content-Type': 'text/plain' });
                   res.end('Datos de producto inválidos o incompletos para añadir.');
                   return;
               }
-
-              // Ejecutar la consulta SQL para insertar el nuevo producto
-              // Usamos las columnas exactas de tu tabla 'productos_farmacia': 'nombre', 'marca', 'precio', 'stock'. El 'id' es AUTO_INCREMENT.
               db.query('INSERT INTO productos_farmacia (nombre, marca, precio, stock) VALUES (?, ?, ?, ?)', [nombre, marca, precio, stock], (err, result) => {
                   if (err) {
                       console.error('Error al insertar nuevo producto en DB:', err);
                       res.writeHead(500, { 'Content-Type': 'text/plain' });
                       res.end('Error al añadir el producto a la base de datos.');
                   } else {
-                      // result.insertId contiene el ID del nuevo producto insertado
                       const newProductId = result.insertId;
                       console.log(`Nuevo producto añadido con éxito. ID: ${newProductId}`);
-                      res.writeHead(201, { 'Content-Type': 'text/plain' }); // Código 201 Created es apropiado para creación
-                      res.end('Producto añadido con éxito.'); // Mensaje de éxito
-                      // Opcional: Podrías enviar el ID del nuevo producto en la respuesta JSON:
-                      // res.writeHead(201, { 'Content-Type': 'application/json' });
-                      // res.end(JSON.stringify({ message: 'Producto añadido con éxito', id: newProductId }));
+                      res.writeHead(201, { 'Content-Type': 'text/plain' });
+                      res.end('Producto añadido con éxito.');
                   }
               });
-
-          } catch (err) { // Error al parsear el JSON inicial
+          } catch (err) {
               console.error('Error al parsear JSON de nuevo producto:', err);
               res.writeHead(400, { 'Content-Type': 'text/plain' });
               res.end('Datos de nuevo producto recibidos inválidos.');
           }
       });
-      }else if (req.url === '/products-api' && req.method === 'DELETE') { // <-- La ruta que espera la petición DELETE
+      }else if (req.url === '/products-api' && req.method === 'DELETE') {
           let body = '';
-
           req.on('data', chunk => {
               body += chunk;
           });
-
           req.on('end', () => {
               try {
-                  const data = JSON.parse(body); // Espera un JSON con un array de IDs: { ids: [...] }
+                  const data = JSON.parse(body);
                   const productIdsToDelete = data.ids;
-
-                  // Validar los datos recibidos - Asegúrate de que sea un array y contenga números
                   if (!Array.isArray(productIdsToDelete) || productIdsToDelete.length === 0) {
                       res.writeHead(400, { 'Content-Type': 'text/plain' });
                       res.end('Datos de eliminación inválidos: se espera una lista de IDs.');
                       return;
                   }
-
-                  // Filtrar IDs no válidos (no números o <= 0)
                   const validIds = productIdsToDelete
                                   .map(id => parseInt(id))
                                   .filter(id => !isNaN(id) && id > 0);
-
                   if (validIds.length === 0) {
                       res.writeHead(400, { 'Content-Type': 'text/plain' });
                       res.end('Ningún ID válido proporcionado para eliminar.');
                       return;
                   }
-
-
-                  // Crear la consulta SQL DELETE. Usamos 'IN (?)' para eliminar múltiples IDs.
-                  // El paquete mysql2 manejará automáticamente el array para generar '(id1, id2, id3)'.
                   db.query('DELETE FROM productos_farmacia WHERE id IN (?)', [validIds], (err, result) => {
                       if (err) {
                           console.error('Error al eliminar productos en DB:', err);
-                          // --- Manejo específico para errores de clave foránea ---
                           if (err.code === 'ER_ROW_IS_REFERENCED_2' || err.errno === 1451) {
-                              res.writeHead(409, { 'Content-Type': 'text/plain' }); // 409 Conflict
+                              res.writeHead(409, { 'Content-Type': 'text/plain' });
                               res.end('No se pueden eliminar algunos productos porque están asociados a ventas existentes.');
                           } else {
-                              // Otros errores de base de datos
                               res.writeHead(500, { 'Content-Type': 'text/plain' });
                               res.end('Error al eliminar los productos de la base de datos.');
                           }
                       } else {
-                          // result.affectedRows te dice cuántas filas fueron eliminadas
                           const deletedCount = result.affectedRows;
                           console.log(`Productos eliminados con éxito. Cantidad: ${deletedCount}`);
                           res.writeHead(200, { 'Content-Type': 'text/plain' });
-                          res.end(`${deletedCount} producto(s) eliminado(s) con éxito.`); // Mensaje de éxito
+                          res.end(`${deletedCount} producto(s) eliminado(s) con éxito.`);
                       }
                   });
-
-              } catch (err) { // Error al parsear el JSON inicial
+              } catch (err) {
                   console.error('Error al parsear JSON de IDs para eliminar:', err);
                   res.writeHead(400, { 'Content-Type': 'text/plain' });
                   res.end('Datos de eliminación recibidos inválidos.');
               }
           });
+    }else if (req.method === 'GET') {
+      const parsedUrl = url.parse(req.url, true);
+      const pathSegments = parsedUrl.pathname.split('/');
 
+      // Verifica si la ruta es '/generate-invoice/:ventaId'
+      if (pathSegments[1] === 'generate-invoice' && pathSegments.length === 3) {
+          const ventaId = parseInt(pathSegments[2]); // El tercer segmento debería ser el ID
+
+          if (isNaN(ventaId) || ventaId <= 0) {
+              res.writeHead(400, { 'Content-Type': 'text/plain' });
+              res.end('ID de venta inválido.');
+              return;
+          }
+
+          // Consultar la base de datos para obtener los detalles de la venta y sus productos
+          const query = `
+              SELECT
+                  v.id as venta_id,
+                  v.fecha as venta_fecha,
+                  v.nombre_cliente as cliente_nombre,
+                  v.total as venta_total,
+                  dv.cantidad,
+                  dv.precio_unitario,
+                    dv.subtotal as detalle_subtotal, // Asegúrate de obtener el subtotal del detalle
+                  p.nombre as producto_nombre,
+                  p.marca as producto_marca,
+                  p.id as producto_id
+              FROM ventas v
+              JOIN detalle_venta dv ON v.id = dv.venta_id
+              JOIN productos_farmacia p ON dv.producto_id = p.id
+              WHERE v.id = ?;
+          `;
+
+          db.query(query, [ventaId], (err, results) => {
+              if (err) {
+                  console.error('Error al obtener detalles de venta para PDF:', err);
+                  res.writeHead(500, { 'Content-Type': 'text/plain' });
+                  res.end('Error al obtener los detalles de la venta.');
+                  return;
+              }
+
+              if (results.length === 0) {
+                  res.writeHead(404, { 'Content-Type': 'text/plain' });
+                  res.end('Venta no encontrada.');
+                  return;
+              }
+
+              // Preparar los datos para la función de generación de PDF
+              const saleDetails = {
+                  id: results[0].venta_id,
+                  fecha: results[0].venta_fecha,
+                  clienteNombre: results[0].cliente_nombre,
+                  total: results[0].venta_total,
+                  productos: results.map(row => ({
+                      id: row.producto_id,
+                      nombre: row.producto_nombre,
+                      marca: row.producto_marca,
+                      cantidad: row.cantidad,
+                      precio_unitario: row.precio_unitario,
+                      subtotal: row.detalle_subtotal // Usar el subtotal del detalle de la tabla
+                  }))
+              };
+
+              // --- Llamar a la función de generación de PDF del archivo pdf.js ---
+              try {
+                  const pdfDoc = generateInvoicePdf(saleDetails); // Llama a la función externa
+
+                  res.writeHead(200, {
+                      'Content-Type': 'application/pdf',
+                      'Content-Disposition': `inline; filename="factura_venta_${ventaId}.pdf"` // 'inline' para abrir en el navegador
+                  });
+
+                  // Pipe el stream del PDF a la respuesta HTTP
+                  pdfDoc.pipe(res);
+                  pdfDoc.end(); // Finaliza el documento PDF
+
+                  console.log(`PDF de venta ${ventaId} generado y enviado.`);
+
+              } catch (pdfError) {
+                  console.error('Error al generar el PDF:', pdfError);
+                  if (!res.headersSent) {
+                      res.writeHead(500, { 'Content-Type': 'text/plain' });
+                      res.end('Error interno al generar el PDF.');
+                  } else {
+                      // Si los encabezados ya se enviaron, intentamos terminar la respuesta
+                      res.end();
+                  }
+              }
+              // --- Fin de la lógica del PDF ---
+          });
+
+      }
     } else {
     res.writeHead(404);
     res.end('Ruta no encontrada');
   }
 }
-
 module.exports = { handle };
