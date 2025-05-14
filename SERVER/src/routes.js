@@ -194,6 +194,79 @@ function handle(req, res) {
         res.end('Datos inválidos.');
       }
     });
+  }else if (req.url === '/api/login' && req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk;
+    });
+
+    req.on('end', () => {
+      try {
+        const userData = JSON.parse(body);
+        const { username, password } = userData;
+
+        if (!username || !password) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ message: 'Usuario y contraseña son requeridos' }));
+          return;
+        }
+
+        // Consulta a la base de datos para encontrar al usuario
+        db.query('SELECT * FROM usuarios WHERE username = ?', [username], (err, results) => {
+          if (err) {
+            console.error('Error en la consulta de login:', err);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ message: 'Error interno del servidor' }));
+            return;
+          }
+
+          if (results.length > 0) {
+            const user = results[0];
+            // IMPORTANTE: Aquí deberías comparar la contraseña hasheada.
+            // Ejemplo con texto plano (NO USAR EN PRODUCCIÓN):
+            if (password === user.password) {
+            // // Ejemplo con bcrypt (RECOMENDADO):
+            // bcrypt.compare(password, user.password_hash, (bcryptErr, match) => {
+            //   if (bcryptErr) {
+            //     console.error('Error comparando hash:', bcryptErr);
+            //     res.writeHead(500, { 'Content-Type': 'application/json' });
+            //     res.end(JSON.stringify({ message: 'Error interno del servidor' }));
+            //     return;
+            //   }
+            //   if (match) {
+                // Login exitoso
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                // Devuelve solo la información necesaria del usuario, no la contraseña.
+                // Y un token si lo usas.
+                res.end(JSON.stringify({
+                  message: 'Login exitoso',
+                  user: { id: user.ID, username: user.username /* otros datos seguros */ },
+                  // token: 'tu_jwt_token_aqui' // Si generas un token
+                }));
+            //   } else {
+            //     // Contraseña incorrecta
+            //     res.writeHead(401, { 'Content-Type': 'application/json' });
+            //     res.end(JSON.stringify({ message: 'Usuario o contraseña incorrectos' }));
+            //   }
+            // });
+            } else {
+              // Contraseña incorrecta (usando comparación de texto plano)
+              res.writeHead(401, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ message: 'Usuario o contraseña incorrectos' }));
+            }
+          } else {
+            // Usuario no encontrado
+            res.writeHead(401, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ message: 'Usuario o contraseña incorrectos' })); // Mensaje genérico por seguridad
+          }
+        });
+
+      } catch (parseError) {
+        console.error('Error al parsear JSON de login:', parseError);
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ message: 'Datos de login inválidos' }));
+      }
+    });
   }else if (req.url === '/register-sale' && req.method === 'POST') { 
         let body = '';
 
@@ -266,6 +339,41 @@ function handle(req, res) {
                 console.error('Error al parsear JSON de venta:', err);
                 res.writeHead(400, { 'Content-Type': 'text/plain' });
                 res.end('Datos de venta recibidos inválidos.');
+            }
+        });
+    } else if ( req.url === "/search" && req.method === "POST") {
+        let body = "";
+
+        req.on("data", (chunk) => {
+            body += chunk;
+        });
+
+        req.on("end", () => {
+            try {
+                const data = JSON.parse(body);
+                const { search } = data;
+
+                if (!search) {
+                    res.writeHead(400, { "Content-Type": "text/plain" });
+                    res.end("Datos de venta incompletos o inválidos.");
+                    return;
+                }
+
+                db.query("SELECT * FROM productos_farmacia WHERE nombre LIKE ?", [`%${search}%`], (err, result) => {
+                    if (err) {
+                        console.error("Error al buscar productos:", err);
+                        res.writeHead(500, { "Content-Type": "text/plain" });
+                        res.end("Error al buscar productos.");
+                        return;
+                    }
+
+                    res.writeHead(200, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify(result));
+                });
+            } catch (err) {
+                console.error("Error al parsear JSON de venta:", err);
+                res.writeHead(400, { "Content-Type": "text/plain" });
+                res.end("Datos de venta recibidos inválidos.");
             }
         });
     } else {

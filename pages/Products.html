@@ -32,6 +32,8 @@
             <img src="../pictures/icons/menu.png" alt="boton_menu">
         </div>
     </header>
+    
+    <p id="error-message" class="justify-center-self"></p>
 
     <div class="form-container width80 margin4vh">
         <div class="title-container margin4vh">
@@ -147,7 +149,7 @@
 
                     <div class="display-inline-flex justify-center width100">
                         <div class="display-block margin-right20px margin-left20px">
-                            <input type="text" name="name_product_update" id="name_product_update" class="input" placeholder=" " required>
+                            <input type="text" name="name_product_update" id="name_product_update" class="input" placeholder=" " required oninput="errorMessage()">
                             <label for="name_product_update" class="label justify-center display-flex"> Product </label>
                         </div>
 
@@ -168,26 +170,25 @@
 
                         <input type="submit" class="button margin-bottom20px" value="Update">
                     </div>
+                    <p id="error_message_update" class="justify-center-self"></p>
                 </div>
 
                 <div class="products-selection justify-center width100">
-                    <div class="scrollable-table-container width90">
-                        <table class="products-container width100 margin-bottom2vh max-height500px min-height350px height100" id="products_table">
-                            <thead>
-                                <tr class="table-header-products">
-                                    <th class="border-right font15"> Id </th>
-                                    <th class="font15"> Product </th>
-                                    <th class="border-left font15"> Price </th>
-                                    <th class="border-left font15"> Stock </th>
-                                    <th class="border-left font15"> Mark </th>
-                                </tr>
-                            </thead>
+                    <table class="products-container width90 margin-bottom2vh max-height500px min-height350px height100" id="products_table">
+                        <thead>
+                            <tr class="table-header-products">
+                                <th class="border-right font15"> Id </th>
+                                <th class="font15"> Product </th>
+                                <th class="border-left font15"> Price </th>
+                                <th class="border-left font15"> Stock </th>
+                                <th class="border-left font15"> Mark </th>
+                            </tr>
+                        </thead>
 
-                            <tbody>
-                                <!-- Aqui van los productos -->
-                            </tbody>
-                        </table>
-                    </div>
+                        <tbody>
+                            <!-- Aqui van los productos -->
+                        </tbody>
+                    </table>
                 </div>
 
                 <div class="buttons">
@@ -253,26 +254,25 @@
 
                 <div>
                     <input type="submit" class="button margin-bottom20px margin-top20px" value="Delete">
+                    <p id="error_message_delete" class="justify-center-self"></p>
                 </div>
 
                 <div class="products-selection justify-center width100">
-                    <div class="scrollable-table-container width90">
-                        <table class="products-container width100 margin-bottom2vh max-height500px min-height350px height100" id="products_table_delete">
-                            <thead>
-                                <tr class="table-header-products">
-                                    <th class="border-right font15"> Id </th>
-                                    <th class="font15"> Product </th>
-                                    <th class="border-left font15"> Price </th>
-                                    <th class="border-left font15"> Stock </th>
-                                    <th class="border-left font15"> Mark </th>
-                                </tr>
-                            </thead>
+                    <table class="products-container width90 margin-bottom2vh max-height500px min-height350px height100" id="products_table_delete">
+                        <thead>
+                            <tr class="table-header-products">
+                                <th class="border-right font15"> Id </th>
+                                <th class="font15"> Product </th>
+                                <th class="border-left font15"> Price </th>
+                                <th class="border-left font15"> Stock </th>
+                                <th class="border-left font15"> Mark </th>
+                            </tr>
+                        </thead>
 
-                            <tbody>
-                                <!-- Aqui van los productos -->
-                            </tbody>
-                        </table>
-                    </div>
+                        <tbody>
+                            <!-- Aqui van los productos -->
+                        </tbody>
+                    </table>
                 </div>
 
                 <div class="buttons">

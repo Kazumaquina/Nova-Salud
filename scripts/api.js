@@ -1,45 +1,51 @@
 const form = document.getElementById('form');
-
-export function saveSale(name_client, products_table) {
-    let products = [];
-
-    let verif = [true, metodo];
-
-    if ( name_client.trim() === '' ) {
-        verif[0] = false;
-        alert('El nombre del cliente no puede estar vacio.');
-    }
-
-    for (let i = 0; i < products_table.length; i++) {
-        if (products_table[i].checked) {
-            products.push(products_table[i].value);
-            console.log(products[i]);
-        }
-    }
-
-    if ( verif[0] ) {
-        fetch('/enviar', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ name_client, products })
-        })
-        .then(response => {
-            if (!response.ok) throw new Error('Error en el envío');
-            return response.text();
-        })
-        .then(msg => {
-            alert(msg);
-            form.reset();
-        })
-        .catch(error => {
-            alert('Hubo un error al enviar los datos.');
-            console.error(error);
-        });
-    }
+export function updateProduct(productData) { // Recibe un objeto con los datos del producto actualizado (incluyendo el ID)
+    fetch('/products-api', { // <-- Esta es la ruta que usaremos para actualizar productos en el servidor
+        method: 'PUT', // Usamos el método PUT para indicar que estamos actualizando un recurso existente
+        headers: {
+            'Content-Type': 'application/json' // Le decimos al servidor que le enviaremos datos en formato JSON
+        },
+        body: JSON.stringify(productData) // Convertimos el objeto de datos (id, nombre, marca, precio, stock) a JSON para enviar
+    })
+    .then(response => {
+        // Manejar la respuesta del servidor (éxito o error)
+        if (!response.ok) throw new Error('Error al obtener productos');
+        return response.json();
+        // Si la respuesta fue OK (ej: 200), leemos el cuerpo como texto (esperando un mensaje de éxito del backend)
+    })
+    .then(msg => { // Recibe el mensaje (éxito o error)
+        console.log(msg); // Lo muestra en una alerta al usuario
+        // Si la actualización fue exitosa, la lógica en main.js (después de llamar a esta función)
+        // debería limpiar el formulario o recargar la lista.
+    })
+    .catch(error => { // Si falla la comunicación, el servidor dio error, o hubo un error en los .then anteriores
+        console.error('Error al actualizar el producto:', error); // Logea el error completo
+    });
 }
-
+export function saveSale(name_client, products_list) { // Recibe el nombre y la lista de productos
+    fetch('/register-sale', { // <-- Apunta a la nueva ruta que crearás en routes.js
+        method: 'POST', // Usamos POST para enviar datos
+        headers: {
+            'Content-Type': 'application/json' // Le decimos al servidor que enviaremos JSON
+        },
+        body: JSON.stringify({ // Convierte los datos a JSON para enviar
+            clientName: name_client, // Nombre del cliente
+            products: products_list  // Lista de productos
+        })
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Error al guardar la venta');
+        return response.text();
+    })
+    .then(msg => { // Recibe el mensaje (éxito o error)
+        alert(msg); // Lo muestra en una alerta
+        // Aquí podrías llamar a una función en main.js para limpiar la interfaz si el mensaje es de éxito
+    })
+    .catch(error => { // Si falla la comunicación o el servidor dio error
+        alert('Hubo un error al guardar la venta: ' + error.message); // Muestra error
+        console.error('Error al guardar la venta:', error);
+    });
+}
 
 export function getStock(obj) {
     const input = document.getElementById(`${obj}`);
@@ -53,7 +59,7 @@ export function getStock(obj) {
         body: JSON.stringify({ id })
     })
     .then(response => {
-        if (!response.ok) throw new Error('Error en el envío');
+        if (!response.ok) throw new Error('Error al obtener el stock');
         return response.text();
     })
     .then(max => {
@@ -70,7 +76,7 @@ export function getProductsNames(obj) {
 
     fetch('/products_names')
     .then(response => {
-        if (!response.ok) throw new Error('Error en el envío');
+        if (!response.ok) throw new Error('Error al obtener los nombres de los productos');
         return response.json();
     })
     .then(items => {
@@ -91,7 +97,7 @@ export async function getProducts() {
     let productos;
     await fetch('/products')
     .then(response => {
-        if (!response.ok) throw new Error('Error en el envío');
+        if (!response.ok) throw new Error('Error al obtener productos');
         return response.json();
     })
     .then(items => {

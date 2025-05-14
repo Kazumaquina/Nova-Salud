@@ -7,6 +7,19 @@
     <link rel="stylesheet" href="../css/fonts/Comic-Relief.css">
     <link rel="stylesheet" href="../css/fonts/Geist.css">
     <title>Login</title>
+    <style>
+        .login-message {
+            text-align: center;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        .login-message.error {
+            color: red;
+        }
+        .login-message.success { 
+            color: green;
+        }
+    </style>
 </head>
 <body>
     
@@ -18,17 +31,17 @@
 
         <h1 class="title font60"> Login </h1>
 
-        <form action="" class="login-form">
-
+        <form class="login-form"> 
             <input id="username" class="input" type="text" placeholder=" " required>
-            <label for="text" class="label"> Username </label>
+            <label for="username" class="label"> Username </label> 
             
             <input id="password" class="input" type="password" placeholder=" " required>
             <label for="password" class="label"> Password </label>
+            <p id="login-message-area" class="login-message"></p> 
             
             <button class="button" type="submit">Login</button>
         </form>
     </div>
-
+    <script src="../scripts/slogin.js"></script>
 </body>
 </html>

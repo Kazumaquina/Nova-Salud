@@ -166,6 +166,7 @@ body {
     flex-direction: row;
     margin: 0;
     padding: 0 2%;
+    z-index: 1000;
 }
 
 .menu-option a {
@@ -356,6 +357,15 @@ body {
     transition: background-color 0.1s ease-in-out;
 }
 
+.table-header-boucher {
+    display: grid;
+    grid-template-columns: 0.8fr 3fr 1.8fr 1.1fr;
+    border-bottom: 2px solid rgb(0, 0, 0);
+    background: rgb(40, 50, 100);
+    border-top-left-radius: 10px;
+    transition: background-color 0.1s ease-in-out;
+}
+
 .table-footer-products {
     display: grid;
     grid-template-columns: 5fr 1.5fr;
@@ -366,6 +376,14 @@ body {
 .table-products-item {
     display: grid;
     grid-template-columns: 0.8fr 3fr 1.1fr 1.1fr 1.5fr;
+    background: linear-gradient(to right, rgb(78, 29, 2), rgb(203, 82, 7));
+    border-bottom: 2px solid rgb(0, 0, 0);
+    transition: background-color 0.1s ease-in-out;
+}
+
+.table-boucher-item {
+    display: grid;
+    grid-template-columns: 0.8fr 3fr 1.8fr 1.1fr;
     background: linear-gradient(to right, rgb(78, 29, 2), rgb(203, 82, 7));
     border-bottom: 2px solid rgb(0, 0, 0);
     transition: background-color 0.1s ease-in-out;
@@ -751,6 +769,10 @@ body {
 /* HEIGHT */
 .height100 {
     height: 100px;
+}
+
+.min-height200px {
+    min-height: 200px;
 }
 
 .min-height350px {
