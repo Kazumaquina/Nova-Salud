@@ -40,6 +40,7 @@ export function saveSale(name_client, products_table) {
     }
 }
 
+
 export function getStock(obj) {
     const input = document.getElementById(`${obj}`);
     const id = input.parentElement.querySelector('select').value;

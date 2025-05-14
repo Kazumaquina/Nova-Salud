@@ -62,7 +62,7 @@
             </div>
 
             <div class="products-selection width100 justify-center">
-                <table class="products-container width90 margin-bottom2vh max-height500px height100" id="productos">
+                <table class="products-container width90 margin-bottom2vh max-height500px min-height350px height100" id="productos">
                     <thead>
                         <tr class="table-header-products">
                             <th class="border-right font15"> Id </th>
@@ -172,7 +172,7 @@
 
                 <div class="products-selection justify-center width100">
                     <div class="scrollable-table-container width90">
-                        <table class="products-container width100 margin-bottom2vh max-height500px height100" id="products_table">
+                        <table class="products-container width100 margin-bottom2vh max-height500px min-height350px height100" id="products_table">
                             <thead>
                                 <tr class="table-header-products">
                                     <th class="border-right font15"> Id </th>
@@ -191,7 +191,7 @@
                 </div>
 
                 <div class="buttons">
-                    <button type="button" class="button margin-bottom10px" onclick="toggleInterface('interface-update')"> Cancel </button>
+                    <button type="button" class="button margin-bottom10px" onclick="toggleInterface('interface-update'), restoreTableOfInterface()"> Cancel </button>
                 </div>
             </form>
         </div>
@@ -257,7 +257,7 @@
 
                 <div class="products-selection justify-center width100">
                     <div class="scrollable-table-container width90">
-                        <table class="products-container width100 margin-bottom2vh max-height500px height100" id="products_table_delete">
+                        <table class="products-container width100 margin-bottom2vh max-height500px min-height350px height100" id="products_table_delete">
                             <thead>
                                 <tr class="table-header-products">
                                     <th class="border-right font15"> Id </th>
@@ -276,7 +276,7 @@
                 </div>
 
                 <div class="buttons">
-                    <button type="button" class="button margin-bottom10px" onclick="toggleInterface('interface-delete')"> Cancel </button>
+                    <button type="button" class="button margin-bottom10px" onclick="toggleInterface('interface-delete'), restoreTableOfInterface()"> Cancel </button>
                 </div>
             </form>
         </div>

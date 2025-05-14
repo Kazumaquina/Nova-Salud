@@ -327,7 +327,6 @@ body {
     border: 2px solid rgb(0, 0, 0);
     border-top-left-radius: 12px;
     border-collapse: collapse;
-    min-height: 350px;
     overflow-y: auto;
 }
 
@@ -752,6 +751,10 @@ body {
 /* HEIGHT */
 .height100 {
     height: 100px;
+}
+
+.min-height350px {
+    min-height: 350px;
 }
 
 .max-height500px {

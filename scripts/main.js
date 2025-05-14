@@ -17,6 +17,7 @@ window.deleteProductFromTable = deleteProductFromTable;
 window.forEachTable = forEachTable;
 window.clearErrorMessage = errorMessage;
 window.toggleInterface = toggleInterface;
+window.restoreTableOfInterface = restoreTableOfInterface;
 
 /* Funciones de Api */
 window.getProducts = api.getProducts;
@@ -28,8 +29,7 @@ try {
         e.preventDefault();
         errorMessage(error_message);
 
-        const name_client = form.name_client.value;
-        const products_table = form.products_table;
+
     });
 } catch (error) {
     console.log('error de evento del form', error);
@@ -255,6 +255,10 @@ async function loadProducts( tabla ) {
         tr.appendChild(td_mark);
     })
 
+    if ( table.id == 'productos' ) {
+        return;
+    }
+
     try {
         table.querySelectorAll('tbody tr').forEach(tr => tr.addEventListener('click', function() { 
             const row = this;
@@ -273,4 +277,9 @@ async function loadProducts( tabla ) {
 function toggleInterface( obj ) {
     const intface = document.getElementById(`${obj}`);
     intface.classList.toggle('hidden');
+}
+
+function restoreTableOfInterface() {
+    selected_rows.forEach(row => row.classList.remove('selected-row'));
+    selected_rows = [];
 }

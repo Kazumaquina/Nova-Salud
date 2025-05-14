@@ -194,7 +194,81 @@ function handle(req, res) {
         res.end('Datos inválidos.');
       }
     });
-  } else {
+  }else if (req.url === '/register-sale' && req.method === 'POST') { 
+        let body = '';
+
+        req.on('data', chunk => {
+            body += chunk;
+        });
+
+        req.on('end', () => {
+            try {
+                const data = JSON.parse(body);
+                const { clientName, products } = data; 
+
+                if (!clientName || !products || !Array.isArray(products) || products.length === 0) {
+                    res.writeHead(400, { 'Content-Type': 'text/plain' });
+                    res.end('Datos de venta incompletos o inválidos.');
+                    return;
+                }
+
+              
+                const saleDate = new Date();
+                db.query('INSERT INTO ventas (fecha, nombre_cliente) VALUES (?, ?)', [saleDate, clientName], (err, result) => {
+                    if (err) {
+                        console.error('Error al insertar venta principal:', err);
+                        res.writeHead(500, { 'Content-Type': 'text/plain' });
+                        res.end('Error al guardar la venta principal.');
+                        return; 
+                    }
+
+                    const ventaId = result.insertId; 
+
+                    let itemsProcessed = 0;
+                    const totalItems = products.length;
+
+                    products.forEach(item => {
+                        const producto_id = parseInt(item.id);
+                        const cantidad = parseInt(item.cantidad);
+                        const precio_unitario = parseFloat(item.precio); 
+
+                        if (isNaN(producto_id) || isNaN(cantidad) || cantidad <= 0 || isNaN(precio_unitario) || precio_unitario < 0) {
+                            console.error('Datos de item de venta inválidos:', item);
+                            itemsProcessed++;
+                            if (itemsProcessed === totalItems) { 
+                                res.writeHead(400, { 'Content-Type': 'text/plain' }); 
+                                res.end('Algunos productos en la venta tenían datos inválidos.');
+                            }
+                            return; 
+                        }
+
+                        db.query('INSERT INTO detalle_venta (venta_id, producto_id, cantidad, precio_unitario) VALUES (?, ?, ?, ?)', [ventaId, producto_id, cantidad, precio_unitario], (err) => {
+                            if (err) {
+                                console.error('Error al insertar detalle de venta:', err);
+                            }
+
+                            db.query('UPDATE productos_farmacia SET stock = stock - ? WHERE id = ?', [cantidad, producto_id], (err) => {
+                                if (err) {
+                                    console.error('Error al actualizar stock:', err);
+                                }
+
+                                itemsProcessed++;
+                                if (itemsProcessed === totalItems) {
+                                    res.writeHead(200, { 'Content-Type': 'text/plain' });
+                                    res.end('Intento de registrar venta procesado. Verifique errores.'); 
+                                }
+                            });
+                        });
+                    });
+                });
+
+            } catch (err) { 
+                console.error('Error al parsear JSON de venta:', err);
+                res.writeHead(400, { 'Content-Type': 'text/plain' });
+                res.end('Datos de venta recibidos inválidos.');
+            }
+        });
+    } else {
     res.writeHead(404);
     res.end('Ruta no encontrada');
   }
