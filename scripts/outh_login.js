@@ -15,7 +15,7 @@ function checkAuthAndProtectPage() {
         
         window.location.href = loginPageUrl;
         return false;
-    }
+    }   
     return true;
 }
 

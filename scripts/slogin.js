@@ -4,7 +4,7 @@ const usernameInput = document.getElementById("username");
 const passwordInput = document.getElementById("password");
 const messageArea = document.getElementById("login-message-area");
 
-  // Función para mostrar mensajes
+// Función para mostrar mensajes
 function showMessage(message, isError = true) {
     messageArea.textContent = message;
     if (isError) {
@@ -22,8 +22,8 @@ loginForm.addEventListener("submit", async function (e) {
     showMessage("");
 
     const userData = {
-      username: usernameInput.value.trim(), // Añadido trim() para limpiar espacios
-      password: passwordInput.value, // La contraseña no se suele trimmear
+        username: usernameInput.value.trim(),
+        password: passwordInput.value,
     };
 
     if (!userData.username || !userData.password) {
@@ -32,7 +32,6 @@ loginForm.addEventListener("submit", async function (e) {
     }
 
     try {
-      // Deshabilitar el botón mientras se procesa para evitar múltiples envíos
         const loginButton = loginForm.querySelector('button[type="submit"]');
         const originalButtonText = loginButton.textContent;
         loginButton.disabled = true;
@@ -45,10 +44,8 @@ loginForm.addEventListener("submit", async function (e) {
         },
         body: JSON.stringify(userData),
     });
-
-      // Volver a habilitar el botón
-        loginButton.disabled = false;
-        loginButton.textContent = originalButtonText;
+    loginButton.disabled = false;
+    loginButton.textContent = originalButtonText;
 
     let data;
     const contentType = response.headers.get("content-type");
@@ -82,18 +79,15 @@ loginForm.addEventListener("submit", async function (e) {
             sessionStorage.removeItem('redirectAfterLogin');
 
 
-        window.location.href = "../pages/index.html"; // Redirección a Home
+        window.location.href = "../pages/index.html";
         let targetUrl = redirectTo;
-            if (!redirectTo.startsWith('../pages/')) { // Simple chequeo, ajusta según tu estructura
+            if (!redirectTo.startsWith('../pages/')) {
                 targetUrl = `../pages/${redirectTo}`;
             }
             window.location.href = targetUrl;
         } else {
-            window.location.href = "../pages/index.html"; // Redirección por defecto
+            window.location.href = "../pages/index.html";
         }
-
-
-
     } else {
         showMessage(data?.message || "Usuario o contraseña incorrectos.");
     }

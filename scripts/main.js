@@ -7,6 +7,7 @@ const form = document.getElementById('form');
 const form_add_product = document.getElementById('form_add_product');
 const error_message = document.getElementById('error-message');
 let selected_rows = [];
+
 /* Funciones del Main */
 window.openMenu = openMenu;
 window.loadProductInfo = loadProductInfo;
@@ -21,12 +22,14 @@ window.toggleInterface = toggleInterface;
 window.restoreTableOfInterface = restoreTableOfInterface;
 window.searchProduct = searchProduct;
 window.deleteSelectedProducts = deleteSelectedProducts;
+window.loadSales = loadSales; //MIGUEL
+
 /* Funciones de Api */
 window.getProducts = api.getProducts;
 window.getProductsNames = api.getProductsNames;
 window.getStock = api.getStock;
 window.addProduct = api.addProduct;
-window.loadSales = loadSales; //MIGUEL
+
 try {
     formUpdate.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -53,7 +56,7 @@ try {
             errorMessage(error_update, 'Precio invalido.');
             return;
         }
-         if (isNaN(newStock) || newStock < 0) {
+        if (isNaN(newStock) || newStock < 0) {
             errorMessage(error_update, 'Stock invalido.');
             return;
         }
@@ -108,7 +111,7 @@ try {
         form_add_product.reset();
         loadProducts('productos');
         } catch (error) {
-             console.error('Error al añadir producto:', error);
+            console.error('Error al añadir producto:', error);
         const displayMessage = error.message || 'Ocurrió un error desconocido al añadir el producto.';
         errorMessage(error_message, 'Error: ' + displayMessage);
         }
@@ -138,7 +141,7 @@ try {
     console.error('Error en el evento submit del formulario de eliminacion:', error);
 }
 try {
-    form.addEventListener('submit', async function(e) { // Asegúrate de que es async
+    form.addEventListener('submit', async function(e) {
         e.preventDefault();
         errorMessage(error_message);
         const name_client = document.getElementById('name_client').value;
@@ -147,24 +150,22 @@ try {
         const rows = tbody.querySelectorAll('tr');
         let products_for_sale = [];
 
-        // Recolectar productos_for_sale (código existente)
         rows.forEach(row => {
             const cells = row.querySelectorAll('td');
-            if (cells.length >= 5) { // Asegúrate de que hay suficientes celdas
+            if (cells.length >= 5) { 
                 const productId = parseInt(cells[0].textContent);
                 const productName = cells[1].textContent;
                 const productPrice = parseFloat(cells[2].textContent.replace('S/. ', ''));
                 const quantity = parseInt(cells[3].textContent);
-                const subTotal = parseFloat(cells[4].textContent.replace('S/. ', '')); // Obtén el subtotal del frontend
+                const subTotal = parseFloat(cells[4].textContent.replace('S/. ', ''));
 
-                 // Validar los datos básicos del producto antes de añadirlo a la lista
                 if (!isNaN(productId) && !isNaN(quantity) && quantity > 0 && !isNaN(productPrice) && productPrice >= 0 && !isNaN(subTotal) && subTotal >= 0) {
                     products_for_sale.push({
                         id: productId,
                         nombre: productName,
-                        precio: productPrice, // Precio unitario
+                        precio: productPrice,
                         cantidad: quantity,
-                        subtotal: subTotal // Subtotal por línea de producto
+                        subtotal: subTotal
                     });
                 } else {
                     console.warn('Producto con datos inválidos en la tabla, será omitido:', {
@@ -186,25 +187,21 @@ try {
         }
 
         try {
-            // 1. Guardar la venta (llama a la API que guarda y devuelve el ID de la venta)
             errorMessage(error_message, 'Registrando venta...');
             const saveResponse = await api.saveSale(name_client, products_for_sale);
             console.log('Respuesta de guardar venta:', saveResponse);
 
-            // Asegúrate de que la respuesta contiene el ID de la venta
             if (!saveResponse || typeof saveResponse.ventaId === 'undefined') {
-                 const msg = saveResponse && saveResponse.message ? saveResponse.message : 'Error desconocido al guardar la venta.';
-                 throw new Error('No se recibió el ID de la venta después de guardar: ' + msg);
+                const msg = saveResponse && saveResponse.message ? saveResponse.message : 'Error desconocido al guardar la venta.';
+                throw new Error('No se recibió el ID de la venta después de guardar: ' + msg);
             }
 
             const ventaId = saveResponse.ventaId;
-            errorMessage(error_message, saveResponse.message + ` (ID: ${ventaId})`); // Muestra el mensaje de éxito de guardado
+            errorMessage(error_message, saveResponse.message + ` (ID: ${ventaId})`);
 
-            // Limpia el formulario y la tabla DESPUÉS de que la venta se haya guardado correctamente
             deleteAllProductsOnTable('products_table');
             document.getElementById('name_client').value = '';
 
-            // 2. Generar y obtener el PDF de la factura (llama a la nueva API GET)
             errorMessage(error_message, `Venta ${ventaId} registrada. Generando factura...`);
             const pdfBlob = await api.getInvoicePdf(ventaId);
 
@@ -212,20 +209,10 @@ try {
             if ( !(pdfBlob instanceof Blob) ) {
                 throw new Error('La respuesta no fue un pdf valido');
             }
-            // 3. Abrir el PDF en una nueva pestaña
+
             errorMessage(error_message, `Factura ${ventaId} generada. Abriendo PDF...`);
             const pdfUrl = URL.createObjectURL(new Blob([pdfBlob], {type: 'application/pdf'}));
             window.open(pdfUrl);
-
-            /*
-            if ( newTab ) {
-                newTab.document.write(
-                    `<iframe src="${pdfUrl}" frameborder="0" class="width100 height100"></iframe>`
-                );
-            } else {
-                alert('No se pudo abrir una pestaña nueva');
-            }
-            */
 
             setTimeout(() => URL.revokeObjectURL(pdfUrl), 10000);
 
@@ -233,26 +220,14 @@ try {
 
 
         } catch (error) {
-            // Maneja errores que ocurran durante la llamada a la API o la generación del PDF
             console.error('Error al procesar la venta o generar PDF:', error);
             errorMessage(error_message, 'Hubo un error al procesar la venta: ' + error.message);
-            // No limpiar el formulario o la tabla si hay un error
         }
     });
 } catch (error) {
     console.error('Error al configurar el evento submit del formulario de venta', error)
 }
-try {
-    form_add_product.addEventListener('submit', function(e) {
-        e.preventDefault();
-        errorMessage(error_message);
-        const productsTableElement = document.getElementById('productos');
-        const tbody = productsTableElement.querySelector('tbody');
-        const rows = tbody.querySelectorAll('tr');
-    });
-} catch (error) {
-    console.error('Error en el evento submit del formulario de venta', error);
-}
+
 async function deleteSelectedProducts() {
     const errorDelete = document.getElementById('error_message_delete');
     const errorGlobal = document.getElementById('error-message');
@@ -261,9 +236,9 @@ async function deleteSelectedProducts() {
     if (errorGlobal) errorMessage(errorGlobal, '');
     if (errorUpdate) errorMessage(errorUpdate, '');
     if (selected_rows.length === 0) {
-         if (errorDelete) errorMessage(errorDelete, 'Debe seleccionar al menos un producto para eliminar.');
-         toggleInterface('confirm-interface');
-         return;
+        if (errorDelete) errorMessage(errorDelete, 'Debe seleccionar al menos un producto para eliminar.');
+        toggleInterface('confirm-interface');
+        return;
     }
     const productIdsToDelete = selected_rows.map(row => {
         const productId = parseInt(row.dataset.productId);
@@ -561,50 +536,50 @@ function searchProduct(tabla, inputs) {
 }
 
 async function loadSales(tableId) {
-  const table = document.getElementById(tableId);
-  if (!table) {
+    const table = document.getElementById(tableId);
+    if (!table) {
     console.error(`Tabla con ID ${tableId} no encontrada.`);
     return;
-  }
-  const tbody = table.querySelector('tbody');
-  if (!tbody) {
+    }
+    const tbody = table.querySelector('tbody');
+    if (!tbody) {
     console.error(`Tbody no encontrado en la tabla ${tableId}.`);
     return;
-  }
-  tbody.innerHTML = ''; // Limpiar la tabla antes de cargar los datos
+    }
+    tbody.innerHTML = ''; // Limpiar la tabla antes de cargar los datos
 
-  try {
+    try {
     const salesData = await api.getSales();
     salesData.forEach(sale => {
-      const tr = document.createElement('tr');
-      tr.classList.add('border-bottom', 'table-boucher-item'); // Clases para estilo (opcional)
+        const tr = document.createElement('tr');
+        tr.classList.add('border-bottom', 'table-boucher-item'); // Clases para estilo (opcional)
 
-      const tdId = document.createElement('td');
-      tdId.classList.add('border-right', 'font13');
-      tdId.textContent = sale.id;
+        const tdId = document.createElement('td');
+        tdId.classList.add('border-right', 'font13');
+        tdId.textContent = sale.id;
 
-      const tdClient = document.createElement('td');
-      tdClient.classList.add('font13');
-      tdClient.textContent = sale.nombre;
+        const tdClient = document.createElement('td');
+        tdClient.classList.add('font13');
+        tdClient.textContent = sale.nombre;
 
-      const tdDate = document.createElement('td');
-      tdDate.classList.add('border-left', 'font13');
-      // Formatear la fecha si es necesario (sale.fecha)
-      const formattedDate = new Date(sale.fecha).toLocaleDateString('es-PE'); // Ejemplo de formato
-      tdDate.textContent = formattedDate;
+        const tdDate = document.createElement('td');
+        tdDate.classList.add('border-left', 'font13');
+        // Formatear la fecha si es necesario (sale.fecha)
+        const formattedDate = new Date(sale.fecha).toLocaleDateString('es-PE'); // Ejemplo de formato
+        tdDate.textContent = formattedDate;
 
-      const tdTotal = document.createElement('td');
-      tdTotal.classList.add('border-left', 'font13');
-      tdTotal.textContent = 'S/. ' + parseFloat(sale.total).toFixed(2);
+        const tdTotal = document.createElement('td');
+        tdTotal.classList.add('border-left', 'font13');
+        tdTotal.textContent = 'S/. ' + parseFloat(sale.total).toFixed(2);
 
-      tr.appendChild(tdId);
-      tr.appendChild(tdClient);
-      tr.appendChild(tdDate);
-      tr.appendChild(tdTotal);
+        tr.appendChild(tdId);
+        tr.appendChild(tdClient);
+        tr.appendChild(tdDate);
+        tr.appendChild(tdTotal);
 
-      tbody.appendChild(tr);
+        tbody.appendChild(tr);
 
-      tr.addEventListener('click', function() {
+        tr.addEventListener('click', function() {
         const clickedRow = this;
         const isSelected = clickedRow.classList.contains('selected-row');
         table.querySelectorAll('tbody tr.selected-row').forEach(r => {
@@ -648,10 +623,10 @@ async function loadSales(tableId) {
         }
     });
     });
-  } catch (error) {
+    } catch (error) {
     console.error('Error al cargar las ventas:', error);
     errorMessage(document.getElementById('error-message'), 'Error al cargar la lista de ventas.');
-  }
+    }
 }
 window.addEventListener('load', () => {
   loadSales('bouchers'); // Asegúrate de usar el ID correcto de tu tabla

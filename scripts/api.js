@@ -19,8 +19,7 @@ export function updateProduct(productData) {
     });
 }
 export function saveSale(name_client, products_list) {
-    // Asegúrate de que el total se calcula en main.js y se envía aquí
-    const total = products_list.reduce((sum, item) => sum + parseFloat(item.subtotal || 0), 0); // Añadido cálculo aquí si no lo envías desde main
+    const total = products_list.reduce((sum, item) => sum + parseFloat(item.subtotal || 0), 0);
 
     return fetch('/register-sale', {
         method: 'POST',
@@ -30,24 +29,21 @@ export function saveSale(name_client, products_list) {
         body: JSON.stringify({
             clientName: name_client,
             products: products_list,
-            total: total // Asegúrate de enviar el total
+            total: total
         })
     })
     .then(response => {
         if (!response.ok) {
-             // Si el backend envía un error (no 200), intenta leer el texto del error
-             // Si la respuesta es 400 o 500 del backend, puede ser texto plano de error
-             return response.text().then(text => {
+            return response.text().then(text => {
                 throw new Error('Error al guardar la venta: ' + text);
-            }).catch(() => { // En caso de que la respuesta no sea texto
-                 throw new Error('Error desconocido al guardar la venta.');
+            }).catch(() => {
+                throw new Error('Error desconocido al guardar la venta.');
             });
         }
-        return response.json(); // Espera una respuesta JSON con { message: ..., ventaId: ... }
+        return response.json();
     });
 }
 
-// --- Nueva función para obtener el PDF ---
 export async function getInvoicePdf(ventaId) {
     const response = await fetch(`/generate-invoice/${ventaId}`);
 
@@ -58,7 +54,6 @@ export async function getInvoicePdf(ventaId) {
 
     const blob = await response.blob();
 
-    // Validación más flexible del tipo MIME (opcional)
     const contentType = blob.type;
     if (!contentType || !contentType.includes('pdf')) {
         throw new Error('La respuesta no fue un PDF válido (tipo detectado: ' + contentType + ')');
@@ -67,45 +62,45 @@ export async function getInvoicePdf(ventaId) {
     return blob;
 }
 export function addProduct(productData) {
-     return fetch('/products-api', {
-         method: 'POST',
-         headers: {
-             'Content-Type': 'application/json'
-         },
-         body: JSON.stringify(productData)
-     })
-     .then(response => {
-         if (!response.ok) {
-              return response.text().then(text => {
-                   const errorDetail = text || response.statusText;
-                   const error = new Error(errorDetail);
-                   error.status = response.status;
-                   throw error;
-              });
-         }
-         return response.text();
-     });
- }
+    return fetch('/products-api', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(productData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => {
+                const errorDetail = text || response.statusText;
+                const error = new Error(errorDetail);
+                error.status = response.status;
+                throw error;
+            });
+        }
+        return response.text();
+    });
+}
 export function deleteProducts(productIds) {
-     return fetch('/products-api', {
-         method: 'DELETE',
-         headers: {
-             'Content-Type': 'application/json'
-         },
-         body: JSON.stringify({ ids: productIds })
-     })
-     .then(response => {
-         if (!response.ok) {
-              return response.text().then(text => {
-                   const errorDetail = text || response.statusText;
-                   const error = new Error(errorDetail);
-                   error.status = response.status;
-                   throw error;
-              });
-         }
-         return response.text();
-     });
- }
+    return fetch('/products-api', {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ ids: productIds })
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => {
+                const errorDetail = text || response.statusText;
+                const error = new Error(errorDetail);
+                error.status = response.status;
+                throw error;
+            });
+        }
+        return response.text();
+    });
+}
 export function getStock(obj) {
     const input = document.getElementById(`${obj}`);
     const id = input.parentElement.querySelector('select').value;
@@ -166,18 +161,18 @@ export async function getProducts() {
     return productos;
 }
 export async function getSales() { //MIGUEL
-  try {
-    const response = await fetch('/ventas');
-    if (!response.ok) {
-      const message = await response.text();
-      throw new Error(`Error al obtener las ventas: ${response.status} - ${message}`);
+    try {
+        const response = await fetch('/ventas');
+        if (!response.ok) {
+        const message = await response.text();
+        throw new Error(`Error al obtener las ventas: ${response.status} - ${message}`);
+        }
+        const salesData = await response.json();
+        return salesData;
+    } catch (error) {
+        console.error('Error al obtener las ventas:', error);
+        throw error;
     }
-    const salesData = await response.json();
-    return salesData;
-  } catch (error) {
-    console.error('Error al obtener las ventas:', error);
-    throw error; // Re-lanza el error para que lo maneje el llamador
-  }
 }
 
 export async function getSalesDetails(id) {
