@@ -1,10 +1,10 @@
-// Importar las dependencias necesarias
+
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const routes = require('./routes');
 
-// Crear el servidor HTTP
+
 const server = http.createServer((req, res) => {
   console.log(`Petición recibida: ${req.method} ${req.url}`);
 
@@ -56,7 +56,7 @@ const server = http.createServer((req, res) => {
   }
 });
 
-// Iniciar el servidor
+
 const PORT = 3000;
 server.listen(PORT, () => {
   console.log(`Servidor iniciado en http://localhost:${PORT}`);
