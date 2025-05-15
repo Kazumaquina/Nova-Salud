@@ -385,11 +385,18 @@ body {
     display: grid;
     grid-template-columns: 0.8fr 3fr 1.8fr 1.1fr;
     background: linear-gradient(to right, rgb(78, 29, 2), rgb(203, 82, 7));
-    border-bottom: 2px solid rgb(0, 0, 0);
+    border-bottom: 2px solid rgb(0, 0, 0);;
     transition: background-color 0.1s ease-in-out;
 }
 
 .table-products-item td {
+    display: flex;
+    height: 30px;
+    justify-content: center;
+    align-items: center;
+}
+
+.table-boucher-item td {
     display: flex;
     height: 30px;
     justify-content: center;

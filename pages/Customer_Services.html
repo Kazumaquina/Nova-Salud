@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="../css/fonts/Geist.css">
     <title>Nova Salud - Customer Service</title>
 </head>
-<body onload="getProductsNames('select_product')">
+<body onload="getProductsNames('select_product'); checkAuthAndProtectPage(); updateLoginLogoutButton();">  
     
     <!-- Header -->
     <header id="menu-header">
@@ -106,5 +106,6 @@
     </div>
 
     <script type="module" src="../scripts/main.js"></script>
+    <script type="module" src="../scripts/outh_login.js"></script>
 </body>
 </html>

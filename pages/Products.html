@@ -8,8 +8,7 @@
     <link rel="stylesheet" href="../css/fonts/Geist.css">
     <title>Nova Salud - Products</title>
 </head>
-<body onload="loadProducts('productos')">
-    
+    <body onload="loadProducts('productos'); checkAuthAndProtectPage(); updateLoginLogoutButton();">    
     <!-- Header -->
     <header id="menu-header">
 
@@ -315,5 +314,7 @@
     </div>
 
     <script type="module" src="../scripts/main.js"></script>
-</body>
+    <script type="module" src="../scripts/outh_login.js"></script>
+
+    </body>
 </html>

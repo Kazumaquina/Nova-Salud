@@ -26,6 +26,8 @@ window.getProducts = api.getProducts;
 window.getProductsNames = api.getProductsNames;
 window.getStock = api.getStock;
 window.addProduct = api.addProduct;
+window.loadSales = loadSales; //MIGUEL
+window.cargarDetalles = cargarDetalles; //MIGUEL
 try {
     formUpdate.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -137,7 +139,7 @@ try {
     console.error('Error en el evento submit del formulario de eliminacion:', error);
 }
 try {
-    form.addEventListener('submit', function(e) {
+    form.addEventListener('submit', async function(e) { // Asegúrate de que es async
         e.preventDefault();
         errorMessage(error_message);
         const name_client = document.getElementById('name_client').value;
@@ -145,33 +147,101 @@ try {
         const tbody = productsTableElement.querySelector('tbody');
         const rows = tbody.querySelectorAll('tr');
         let products_for_sale = [];
+
+        // Recolectar productos_for_sale (código existente)
         rows.forEach(row => {
             const cells = row.querySelectorAll('td');
-            if (cells.length > 0) {
+            if (cells.length >= 5) { // Asegúrate de que hay suficientes celdas
                 const productId = parseInt(cells[0].textContent);
                 const productName = cells[1].textContent;
                 const productPrice = parseFloat(cells[2].textContent.replace('S/. ', ''));
                 const quantity = parseInt(cells[3].textContent);
-                const subTotal = parseFloat(cells[4].textContent.replace('S/. ', ''));
-                products_for_sale.push({
-                    id: productId,
-                    nombre: productName,
-                    precio: productPrice,
-                    cantidad: quantity,
-                    subtotal: subTotal
-                });
+                const subTotal = parseFloat(cells[4].textContent.replace('S/. ', '')); // Obtén el subtotal del frontend
+
+                 // Validar los datos básicos del producto antes de añadirlo a la lista
+                if (!isNaN(productId) && !isNaN(quantity) && quantity > 0 && !isNaN(productPrice) && productPrice >= 0 && !isNaN(subTotal) && subTotal >= 0) {
+                    products_for_sale.push({
+                        id: productId,
+                        nombre: productName,
+                        precio: productPrice, // Precio unitario
+                        cantidad: quantity,
+                        subtotal: subTotal // Subtotal por línea de producto
+                    });
+                } else {
+                    console.warn('Producto con datos inválidos en la tabla, será omitido:', {
+                        id: cells[0].textContent,
+                        nombre: cells[1].textContent,
+                        precio: cells[2].textContent,
+                        cantidad: cells[3].textContent,
+                        subTotal: cells[4].textContent
+                    });
+                    errorMessage(error_message, 'Advertencia: Algunos productos en la tabla tienen datos inválidos y no se incluirán en la venta.');
+                }
             }
         });
+
+
         if (name_client.trim() === '' || products_for_sale.length === 0) {
-            errorMessage(error_message, 'Nombre del cliente y/o productos faltantes.');
+            errorMessage(error_message, 'Nombre del cliente y/o productos faltantes o inválidos en la tabla.');
             return;
         }
-        api.saveSale(name_client, products_for_sale);
-        deleteAllProductsOnTable('products_table');
-        document.getElementById('name_client').value = '';
+
+        try {
+            // 1. Guardar la venta (llama a la API que guarda y devuelve el ID de la venta)
+            errorMessage(error_message, 'Registrando venta...');
+            const saveResponse = await api.saveSale(name_client, products_for_sale);
+            console.log('Respuesta de guardar venta:', saveResponse);
+
+            // Asegúrate de que la respuesta contiene el ID de la venta
+            if (!saveResponse || typeof saveResponse.ventaId === 'undefined') {
+                 const msg = saveResponse && saveResponse.message ? saveResponse.message : 'Error desconocido al guardar la venta.';
+                 throw new Error('No se recibió el ID de la venta después de guardar: ' + msg);
+            }
+
+            const ventaId = saveResponse.ventaId;
+            errorMessage(error_message, saveResponse.message + ` (ID: ${ventaId})`); // Muestra el mensaje de éxito de guardado
+
+            // Limpia el formulario y la tabla DESPUÉS de que la venta se haya guardado correctamente
+            deleteAllProductsOnTable('products_table');
+            document.getElementById('name_client').value = '';
+
+            // 2. Generar y obtener el PDF de la factura (llama a la nueva API GET)
+            errorMessage(error_message, `Venta ${ventaId} registrada. Generando factura...`);
+            const pdfBlob = await api.getInvoicePdf(ventaId);
+
+
+            if ( !(pdfBlob instanceof Blob) ) {
+                throw new Error('La respuesta no fue un pdf valido');
+            }
+            // 3. Abrir el PDF en una nueva pestaña
+            errorMessage(error_message, `Factura ${ventaId} generada. Abriendo PDF...`);
+            const pdfUrl = URL.createObjectURL(new Blob([pdfBlob], {type: 'application/pdf'}));
+            window.open(pdfUrl);
+
+            /*
+            if ( newTab ) {
+                newTab.document.write(
+                    `<iframe src="${pdfUrl}" frameborder="0" class="width100 height100"></iframe>`
+                );
+            } else {
+                alert('No se pudo abrir una pestaña nueva');
+            }
+            */
+
+            setTimeout(() => URL.revokeObjectURL(pdfUrl), 10000);
+
+            errorMessage(error_message, `Venta ${ventaId} registrada y factura abierta.`);
+
+
+        } catch (error) {
+            // Maneja errores que ocurran durante la llamada a la API o la generación del PDF
+            console.error('Error al procesar la venta o generar PDF:', error);
+            errorMessage(error_message, 'Hubo un error al procesar la venta: ' + error.message);
+            // No limpiar el formulario o la tabla si hay un error
+        }
     });
 } catch (error) {
-    console.error('Error en el evento submit del formulario de venta', error)
+    console.error('Error al configurar el evento submit del formulario de venta', error)
 }
 try {
     form_add_product.addEventListener('submit', function(e) {
@@ -490,3 +560,78 @@ function searchProduct(tabla, inputs) {
         row[0].parentElement.classList.remove('display-none');
     });
 }
+function cargarDetalles(ventaId) {
+    fetch(`/generate-invoice/${ventaId}`)
+        .then(res => {
+            if (!res.ok) throw new Error('Error al obtener detalles');
+            return res.json(); // ← NECESITAS QUE EL BACKEND DEVUELVA JSON AQUÍ
+        })
+        .then(venta => {
+            const tbody = document.querySelector('#details tbody');
+            tbody.innerHTML = ''; // limpiar detalles previos
+            venta.productos.forEach(prod => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${prod.id}</td>
+                    <td>${prod.nombre}</td>
+                    <td>${prod.precio_unitario.toFixed(2)}</td>
+                    <td>${prod.cantidad}</td>
+                    <td>${prod.subtotal.toFixed(2)}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        })
+        .catch(err => console.error('Error al cargar detalles:', err));
+}
+async function loadSales(tableId) {
+  const table = document.getElementById(tableId);
+  if (!table) {
+    console.error(`Tabla con ID ${tableId} no encontrada.`);
+    return;
+  }
+  const tbody = table.querySelector('tbody');
+  if (!tbody) {
+    console.error(`Tbody no encontrado en la tabla ${tableId}.`);
+    return;
+  }
+  tbody.innerHTML = ''; // Limpiar la tabla antes de cargar los datos
+
+  try {
+    const salesData = await api.getSales();
+    salesData.forEach(sale => {
+      const tr = document.createElement('tr');
+      tr.classList.add('border-bottom', 'table-boucher-item'); // Clases para estilo (opcional)
+
+      const tdId = document.createElement('td');
+      tdId.classList.add('border-right', 'font13');
+      tdId.textContent = sale.id;
+
+      const tdClient = document.createElement('td');
+      tdClient.classList.add('font13');
+      tdClient.textContent = sale.nombre;
+
+      const tdDate = document.createElement('td');
+      tdDate.classList.add('border-left', 'font13');
+      // Formatear la fecha si es necesario (sale.fecha)
+      const formattedDate = new Date(sale.fecha).toLocaleDateString('es-PE'); // Ejemplo de formato
+      tdDate.textContent = formattedDate;
+
+      const tdTotal = document.createElement('td');
+      tdTotal.classList.add('border-left', 'font13');
+      tdTotal.textContent = 'S/. ' + parseFloat(sale.total).toFixed(2);
+
+      tr.appendChild(tdId);
+      tr.appendChild(tdClient);
+      tr.appendChild(tdDate);
+      tr.appendChild(tdTotal);
+
+      tbody.appendChild(tr);
+    });
+  } catch (error) {
+    console.error('Error al cargar las ventas:', error);
+    errorMessage(document.getElementById('error-message'), 'Error al cargar la lista de ventas.');
+  }
+}
+window.addEventListener('load', () => {
+  loadSales('bouchers'); // Asegúrate de usar el ID correcto de tu tabla
+});

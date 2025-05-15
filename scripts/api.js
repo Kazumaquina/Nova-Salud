@@ -19,27 +19,52 @@ export function updateProduct(productData) {
     });
 }
 export function saveSale(name_client, products_list) {
-    fetch('/register-sale', {
+    // Asegúrate de que el total se calcula en main.js y se envía aquí
+    const total = products_list.reduce((sum, item) => sum + parseFloat(item.subtotal || 0), 0); // Añadido cálculo aquí si no lo envías desde main
+
+    return fetch('/register-sale', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
             clientName: name_client,
-            products: products_list
+            products: products_list,
+            total: total // Asegúrate de enviar el total
         })
     })
     .then(response => {
-        if (!response.ok) throw new Error('Error al guardar la venta');
-        return response.text();
-    })
-    .then(msg => {
-        alert(msg);
-    })
-    .catch(error => {
-        alert('Hubo un error al guardar la venta: ' + error.message);
-        console.error('Error al guardar la venta:', error);
+        if (!response.ok) {
+             // Si el backend envía un error (no 200), intenta leer el texto del error
+             // Si la respuesta es 400 o 500 del backend, puede ser texto plano de error
+             return response.text().then(text => {
+                throw new Error('Error al guardar la venta: ' + text);
+            }).catch(() => { // En caso de que la respuesta no sea texto
+                 throw new Error('Error desconocido al guardar la venta.');
+            });
+        }
+        return response.json(); // Espera una respuesta JSON con { message: ..., ventaId: ... }
     });
+}
+
+// --- Nueva función para obtener el PDF ---
+export async function getInvoicePdf(ventaId) {
+    const response = await fetch(`/generate-invoice/${ventaId}`);
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error('Error al generar PDF: ' + errorText);
+    }
+
+    const blob = await response.blob();
+
+    // Validación más flexible del tipo MIME (opcional)
+    const contentType = blob.type;
+    if (!contentType || !contentType.includes('pdf')) {
+        throw new Error('La respuesta no fue un PDF válido (tipo detectado: ' + contentType + ')');
+    }
+
+    return blob;
 }
 export function addProduct(productData) {
      return fetch('/products-api', {
@@ -139,4 +164,18 @@ export async function getProducts() {
         return
     });
     return productos;
+}
+export async function getSales() { //MIGUEL
+  try {
+    const response = await fetch('/ventas');
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(`Error al obtener las ventas: ${response.status} - ${message}`);
+    }
+    const salesData = await response.json();
+    return salesData;
+  } catch (error) {
+    console.error('Error al obtener las ventas:', error);
+    throw error; // Re-lanza el error para que lo maneje el llamador
+  }
 }

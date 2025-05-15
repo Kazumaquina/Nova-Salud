@@ -68,15 +68,32 @@ loginForm.addEventListener("submit", async function (e) {
 
     if (response.ok) {
         if (data && data.user) {
-          // Asegurarse que data y data.user existen
             localStorage.setItem("user", JSON.stringify(data.user));
         }
+        localStorage.setItem('isLoggedIn', 'true');
+
         if (data && data.token) {
-          // Asegurarse que data y data.token existen
-            localStorage.setItem("token", data.token);
+            localStorage.setItem('sessionToken', data.token);
+        } else {
+            localStorage.setItem('isLoggedIn', 'true'); 
         }
+        const redirectTo = sessionStorage.getItem('redirectAfterLogin');
+        if (redirectTo) {
+            sessionStorage.removeItem('redirectAfterLogin');
+
 
         window.location.href = "../pages/index.html"; // Redirección a Home
+        let targetUrl = redirectTo;
+            if (!redirectTo.startsWith('../pages/')) { // Simple chequeo, ajusta según tu estructura
+                targetUrl = `../pages/${redirectTo}`;
+            }
+            window.location.href = targetUrl;
+        } else {
+            window.location.href = "../pages/index.html"; // Redirección por defecto
+        }
+
+
+
     } else {
         showMessage(data?.message || "Usuario o contraseña incorrectos.");
     }
