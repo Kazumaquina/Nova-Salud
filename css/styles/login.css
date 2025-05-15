@@ -142,3 +142,17 @@ body {
     --color_text3: var(--blue_company_dark);
     box-shadow: inset 0 0 15px var(--blue_company);
 }
+
+.login-message {
+    text-align: center;
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+.login-message.error {
+    color: red;
+}
+
+.login-message.success { 
+    color: green;
+}
