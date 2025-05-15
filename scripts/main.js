@@ -27,7 +27,6 @@ window.getProductsNames = api.getProductsNames;
 window.getStock = api.getStock;
 window.addProduct = api.addProduct;
 window.loadSales = loadSales; //MIGUEL
-window.cargarDetalles = cargarDetalles; //MIGUEL
 try {
     formUpdate.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -560,29 +559,7 @@ function searchProduct(tabla, inputs) {
         row[0].parentElement.classList.remove('display-none');
     });
 }
-function cargarDetalles(ventaId) {
-    fetch(`/generate-invoice/${ventaId}`)
-        .then(res => {
-            if (!res.ok) throw new Error('Error al obtener detalles');
-            return res.json(); // ← NECESITAS QUE EL BACKEND DEVUELVA JSON AQUÍ
-        })
-        .then(venta => {
-            const tbody = document.querySelector('#details tbody');
-            tbody.innerHTML = ''; // limpiar detalles previos
-            venta.productos.forEach(prod => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${prod.id}</td>
-                    <td>${prod.nombre}</td>
-                    <td>${prod.precio_unitario.toFixed(2)}</td>
-                    <td>${prod.cantidad}</td>
-                    <td>${prod.subtotal.toFixed(2)}</td>
-                `;
-                tbody.appendChild(row);
-            });
-        })
-        .catch(err => console.error('Error al cargar detalles:', err));
-}
+
 async function loadSales(tableId) {
   const table = document.getElementById(tableId);
   if (!table) {
@@ -626,6 +603,50 @@ async function loadSales(tableId) {
       tr.appendChild(tdTotal);
 
       tbody.appendChild(tr);
+
+      tr.addEventListener('click', function() {
+        const clickedRow = this;
+        const isSelected = clickedRow.classList.contains('selected-row');
+        table.querySelectorAll('tbody tr.selected-row').forEach(r => {
+            if (r !== clickedRow) r.classList.remove('selected-row');
+        });
+        if (isSelected) {
+            clickedRow.classList.remove('selected-row');
+        } else {
+            clickedRow.classList.add('selected-row');
+            const id = clickedRow.cells[0].textContent;
+            const details = api.getSalesDetails(id);
+            details.then(data => {
+                const tbody = document.querySelector('#details tbody');
+                tbody.innerHTML = '';
+                data.forEach(detail => {
+                    const tr = document.createElement('tr');
+                    tr.classList.add('border-bottom', 'table-details-item');
+                    const tdId = document.createElement('td');
+                    tdId.classList.add('border-right', 'font13');
+                    tdId.textContent = detail.id;
+                    const tdProduct = document.createElement('td');
+                    tdProduct.classList.add('font13');
+                    tdProduct.textContent = detail.nombre + ' (' + detail.marca + ')';
+                    const tdPrice = document.createElement('td');
+                    tdPrice.classList.add('border-left', 'font13');
+                    tdPrice.textContent = 'S/. ' + parseFloat(detail.precio_unitario).toFixed(2);
+                    const tdQuantity = document.createElement('td');
+                    tdQuantity.classList.add('border-left', 'font13');
+                    tdQuantity.textContent = detail.cantidad;
+                    const tdSubtotal = document.createElement('td');
+                    tdSubtotal.classList.add('border-left', 'font13');
+                    tdSubtotal.textContent = 'S/. ' + parseFloat(detail.subtotal).toFixed(2);
+                    tr.appendChild(tdId);
+                    tr.appendChild(tdProduct);
+                    tr.appendChild(tdPrice);
+                    tr.appendChild(tdQuantity);
+                    tr.appendChild(tdSubtotal);
+                    tbody.appendChild(tr);
+                });
+            });
+        }
+    });
     });
   } catch (error) {
     console.error('Error al cargar las ventas:', error);

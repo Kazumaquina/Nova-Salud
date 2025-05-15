@@ -575,6 +575,24 @@ function handle(req, res) {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(results));
     });
+  } else if ( req.url === '/sale_details' && req.method === 'POST' ) {
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk;
+    });
+    req.on('end', () => {
+      const { id } = JSON.parse(body);
+      db.query('SELECT dv.id, pf.nombre, pf.marca, dv.precio_unitario, dv.cantidad, dv.subtotal FROM detalle_venta dv, productos_farmacia pf WHERE dv.producto_id = pf.id AND dv.venta_id = ?;', [id], (err, results) => {
+        if (err) {
+          console.error('Error al obtener el detalle de ventas:', err);
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Error interno al obtener el detalle de ventas' }));
+          return;
+        }
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(results));
+      });
+    });
   } else {
     res.writeHead(404);
     res.end('Ruta no encontrada');

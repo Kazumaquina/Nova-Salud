@@ -179,3 +179,23 @@ export async function getSales() { //MIGUEL
     throw error; // Re-lanza el error para que lo maneje el llamador
   }
 }
+
+export async function getSalesDetails(id) {
+    try {
+        return await fetch('/sale_details', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ id })
+        }).then(response => {
+            if (!response.ok) throw new Error('Error al obtener el detalle de ventas');
+            return response.json();
+        }).then(items => {
+            return items;
+        })
+    } catch (error) {
+        console.error('Error al obtener el detalle de ventas');
+        throw error;
+    }
+}

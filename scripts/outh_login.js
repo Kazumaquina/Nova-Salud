@@ -13,7 +13,7 @@ function checkAuthAndProtectPage() {
     if (protectedPages.includes(currentPage) && !isLoggedIn) {
         alert('Debes iniciar sesión para acceder a esta página.');
         
-        window.location.href = `Login.html?redirect=${encodeURIComponent(currentPage)}`;
+        window.location.href = loginPageUrl;
         return false;
     }
     return true;
