@@ -17,8 +17,6 @@ const server = http.createServer((req, res) => {
         return res.end();
     }
 
-
-
   if (req.url === '/' && req.method === 'GET') {
     const filePath = path.join(__dirname, '../../index.html');
     fs.readFile(filePath, (err, content) => {
@@ -57,7 +55,6 @@ const server = http.createServer((req, res) => {
     routes.handle(req, res);
   }
 });
-
 
 // Iniciar el servidor
 const PORT = 3000;

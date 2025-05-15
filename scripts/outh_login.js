@@ -1,3 +1,9 @@
+/* FUNCIONES */
+window.checkAuthAndProtectPage = checkAuthAndProtectPage;
+window.handleLogout = handleLogout;
+window.updateLoginLogoutButton = updateLoginLogoutButton;
+
+
 function checkAuthAndProtectPage() {
     const isLoggedIn = localStorage.getItem('isLoggedIn');
     const currentPage = window.location.pathname.split('/').pop();
@@ -19,16 +25,14 @@ function checkAuthAndProtectPage() {
     return true;
 }
 
-// Función para manejar el Logout
 function handleLogout() {
     localStorage.removeItem('currentUser');
-    localStorage.removeItem('sessionToken'); // Si usas token
+    localStorage.removeItem('sessionToken');
     localStorage.removeItem('isLoggedIn');
     alert('Has cerrado sesión.');
-    window.location.href = 'Login.html'; // O 'index.html'
+    window.location.href = 'Login.html';
 }
 
-// Función para actualizar la UI del menú (botón Login/Logout)
 function updateLoginLogoutButton() {
     const loginOptionLi = document.getElementById('login');
     if (!loginOptionLi) return;
@@ -36,9 +40,8 @@ function updateLoginLogoutButton() {
     const isLoggedIn = localStorage.getItem('isLoggedIn');
     const loginLink = loginOptionLi.querySelector('a');
 
-    let loginPageUrl = 'Login.html'; // Ajustar como arriba
+    let loginPageUrl = 'Login.html';
     if (window.location.pathname.includes('/pages/')) {
-        // Ya estamos en pages, Login.html debería estar al mismo nivel
     } else if (window.location.pathname.endsWith('index.html') && !window.location.pathname.includes('/pages/')) {
         loginPageUrl = 'pages/Login.html';
     }
@@ -64,9 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateLoginLogoutButton();
     }
 
-
-    // Esta parte es específica para cuando se carga la página Login.html
-    if (window.location.pathname.endsWith('Login.html') || window.location.pathname.endsWith('/pages/Login.html')) { // Ser más específico
+    if (window.location.pathname.endsWith('Login.html') || window.location.pathname.endsWith('/pages/Login.html')) {
         const urlParams = new URLSearchParams(window.location.search);
         const redirectPage = urlParams.get('redirect');
         if (redirectPage) {
@@ -74,19 +75,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
-
-
-window.checkAuthAndProtectPage = checkAuthAndProtectPage;
-window.handleLogout = handleLogout;
-window.updateLoginLogoutButton = updateLoginLogoutButton;
-
-
 document.addEventListener('DOMContentLoaded', () => {
     if (window.location.pathname.endsWith('Login.html')) {
         const urlParams = new URLSearchParams(window.location.search);
         const redirectPage = urlParams.get('redirect');
         if (redirectPage) {
-            // guara sesio para rediccionar a la pagina
             sessionStorage.setItem('redirectAfterLogin', redirectPage);
         }
     }
