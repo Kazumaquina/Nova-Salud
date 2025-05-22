@@ -6,7 +6,6 @@ const routes = require('./routes');
 
 
 const server = http.createServer((req, res) => {
-  console.log(`Petición recibida: ${req.method} ${req.url}`);
 
   if (req.method === 'OPTIONS') {
     res.writeHead(204, {

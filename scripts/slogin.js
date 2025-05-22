@@ -37,7 +37,7 @@ loginForm.addEventListener("submit", async function (e) {
         loginButton.disabled = true;
         loginButton.textContent = "Ingresando...";
 
-        const response = await fetch("http://localhost:3000/api/login", {
+        const response = await fetch("/api/login", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
